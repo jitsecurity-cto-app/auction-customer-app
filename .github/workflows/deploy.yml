@@ -1,0 +1,120 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'dev' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run type check
+        run: npm run type-check
+
+      - name: Run tests
+        run: npm test
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.6.0'
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Terraform Init
+        working-directory: ./terraform
+        run: terraform init
+
+      - name: Terraform Format Check
+        working-directory: ./terraform
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Validate
+        working-directory: ./terraform
+        env:
+          TF_VAR_environment: ${{ github.event.inputs.environment || 'dev' }}
+          TF_VAR_api_url: ${{ secrets.API_URL || '' }}
+        run: terraform validate
+
+      - name: Terraform Plan
+        working-directory: ./terraform
+        env:
+          TF_VAR_environment: ${{ github.event.inputs.environment || 'dev' }}
+          TF_VAR_api_url: ${{ secrets.API_URL || '' }}
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        working-directory: ./terraform
+        env:
+          TF_VAR_environment: ${{ github.event.inputs.environment || 'dev' }}
+          TF_VAR_api_url: ${{ secrets.API_URL || '' }}
+        run: terraform apply -auto-approve tfplan
+
+      - name: Get Terraform outputs
+        id: terraform
+        working-directory: ./terraform
+        run: |
+          echo "s3_bucket=$(terraform output -raw s3_bucket_name)" >> $GITHUB_OUTPUT
+          echo "cloudfront_id=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_OUTPUT
+          echo "website_url=$(terraform output -raw website_url)" >> $GITHUB_OUTPUT
+
+      - name: Build Next.js application
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || secrets.API_URL || '' }}
+        run: npm run build
+
+      - name: Deploy to S3
+        run: |
+          aws s3 sync ./out s3://${{ steps.terraform.outputs.s3_bucket }} --delete --cache-control "public, max-age=31536000, immutable" --exclude "*.html" --exclude "*.json"
+          aws s3 sync ./out s3://${{ steps.terraform.outputs.s3_bucket }} --delete --cache-control "public, max-age=0, must-revalidate" --exclude "*" --include "*.html" --include "*.json"
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ steps.terraform.outputs.cloudfront_id }} \
+            --paths "/*"
+
+      - name: Deployment summary
+        run: |
+          echo "## Deployment Complete 🚀" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ github.event.inputs.environment || 'dev' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Website URL:** ${{ steps.terraform.outputs.website_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "**S3 Bucket:** ${{ steps.terraform.outputs.s3_bucket }}" >> $GITHUB_STEP_SUMMARY
+          echo "**CloudFront Distribution:** ${{ steps.terraform.outputs.cloudfront_id }}" >> $GITHUB_STEP_SUMMARY

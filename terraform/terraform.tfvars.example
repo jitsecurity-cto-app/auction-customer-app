@@ -1,0 +1,13 @@
+# Copy this file to terraform.tfvars and fill in your values
+# terraform.tfvars is gitignored and should not be committed
+
+aws_region = "us-east-1"
+environment = "dev"
+project_name = "auction-lab"
+
+# Optional: Custom domain
+# domain_name = "customer.example.com"
+
+# API URL for the database service
+# api_url = "https://api.example.com"
+
