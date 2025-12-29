@@ -54,7 +54,7 @@ describe('Auction Flow E2E Tests', () => {
         },
       ];
 
-      (api.get as jest.Mock).mockResolvedValue(mockAuctions);
+      (api.getAuctions as jest.Mock).mockResolvedValue({ data: mockAuctions });
 
       const { container } = render(<AuctionList />);
 
@@ -80,14 +80,15 @@ describe('Auction Flow E2E Tests', () => {
       const error = new Error(errorMessage);
       error.stack = errorStack;
       
-      (api.get as jest.Mock).mockRejectedValue(error);
+      // Mock getAuctions since that's what the component uses
+      (api.getAuctions as jest.Mock).mockRejectedValue(error);
 
       render(<AuctionList />);
 
       await waitFor(() => {
         // Verify verbose error messages are displayed (vulnerability)
         expect(screen.getByText(`Error: ${errorMessage}`)).toBeInTheDocument();
-      });
+      }, { timeout: 3000 });
     });
   });
 

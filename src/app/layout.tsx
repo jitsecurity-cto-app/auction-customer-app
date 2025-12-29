@@ -1,4 +1,5 @@
 import Navbar from '../components/Navbar';
+import ErrorHandler from '../components/ErrorHandler';
 import './globals.css';
 // Import design system theme CSS directly
 import '../../../design-system/src/theme/reset.css';
@@ -17,6 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <ErrorHandler />
         <Navbar />
         {children}
       </body>

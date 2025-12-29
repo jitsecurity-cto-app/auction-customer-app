@@ -11,6 +11,7 @@ const customJestConfig = {
   testEnvironment: 'jest-environment-jsdom',
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    '^react/jsx-runtime$': require.resolve('react/jsx-runtime'),
   },
   moduleDirectories: ['node_modules', '<rootDir>'],
   testMatch: [

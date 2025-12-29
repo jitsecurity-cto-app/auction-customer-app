@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
-import { Card, CardContent, Input, Button } from '@design-system/components';
+import { Input, Button } from '@design-system/components';
 import styles from './SearchBar.module.css';
 
 interface SearchBarProps {
@@ -40,53 +40,49 @@ export default function SearchBar({
   };
 
   return (
-    <Card variant="outlined" padding="md" className={styles.container}>
-      <CardContent>
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.searchRow}>
-            <Input
-              type="text"
-              placeholder="Search auctions by title or description..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              fullWidth
-              className={styles.searchInput}
-            />
-            <Button type="submit" variant="primary">
-              Search
-            </Button>
-            {(search || minPrice || maxPrice) && (
-              <Button type="button" variant="secondary" onClick={handleClear}>
-                Clear
-              </Button>
-            )}
-          </div>
-          <div className={styles.filterRow}>
-            <Input
-              id="minPrice"
-              label="Min Price"
-              type="number"
-              placeholder="0.00"
-              value={minPrice}
-              onChange={(e) => setMinPrice(e.target.value)}
-              step="0.01"
-              min="0"
-              className={styles.priceInput}
-            />
-            <Input
-              id="maxPrice"
-              label="Max Price"
-              type="number"
-              placeholder="10000.00"
-              value={maxPrice}
-              onChange={(e) => setMaxPrice(e.target.value)}
-              step="0.01"
-              min="0"
-              className={styles.priceInput}
-            />
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+    <form onSubmit={handleSubmit} className={styles.form}>
+      <div className={styles.searchRow}>
+        <Input
+          type="text"
+          placeholder="Search auctions by title or description..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          fullWidth
+          className={styles.searchInput}
+        />
+        <Button type="submit" variant="primary">
+          Search
+        </Button>
+        {(search || minPrice || maxPrice) && (
+          <Button type="button" variant="secondary" onClick={handleClear}>
+            Clear
+          </Button>
+        )}
+      </div>
+      <div className={styles.filterRow}>
+        <Input
+          id="minPrice"
+          label="Min Price"
+          type="number"
+          placeholder="0.00"
+          value={minPrice}
+          onChange={(e) => setMinPrice(e.target.value)}
+          step="0.01"
+          min="0"
+          className={styles.priceInput}
+        />
+        <Input
+          id="maxPrice"
+          label="Max Price"
+          type="number"
+          placeholder="10000.00"
+          value={maxPrice}
+          onChange={(e) => setMaxPrice(e.target.value)}
+          step="0.01"
+          min="0"
+          className={styles.priceInput}
+        />
+      </div>
+    </form>
   );
 }

@@ -1,31 +1,122 @@
-.container {
-  padding: var(--spacing-8);
-  max-width: 1200px;
-  margin: 0 auto;
+.main {
+  min-height: calc(100vh - 200px);
+  background-color: var(--bg-primary);
 }
 
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--spacing-8) var(--spacing-6);
+}
+
+/* Header Section */
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: var(--spacing-8);
+  gap: var(--spacing-6);
   flex-wrap: wrap;
-  gap: var(--spacing-4);
+}
+
+.headerContent {
+  flex: 1;
+  min-width: 0;
 }
 
 .title {
   font-size: var(--font-size-4xl);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-extrabold);
   color: var(--text-primary);
-  margin: 0;
+  margin: 0 0 var(--spacing-2) 0;
   line-height: var(--line-height-tight);
 }
 
-.filters {
+.subtitle {
+  font-size: var(--font-size-lg);
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: var(--line-height-relaxed);
+}
+
+/* Filters Section */
+.filtersSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-6);
+}
+
+.searchCard {
+  width: 100%;
+}
+
+.filterCard {
+  width: 100%;
+}
+
+.filterHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-3);
+}
+
+.filterLabel {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filterButtons {
   display: flex;
   gap: var(--spacing-2);
-  margin-bottom: var(--spacing-8);
   flex-wrap: wrap;
+}
+
+/* Active Filters */
+.activeFilters {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-6);
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-primary);
+  flex-wrap: wrap;
+}
+
+.activeFiltersLabel {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+}
+
+.activeFiltersList {
+  display: flex;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+}
+
+/* Auctions Section */
+.auctionsSection {
+  margin-top: var(--spacing-4);
+}
+
+.loading {
+  padding: var(--spacing-12);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .container {
+    padding: var(--spacing-6) var(--spacing-4);
+  }
 }
 
 @media (max-width: 768px) {
@@ -33,7 +124,36 @@
     padding: var(--spacing-4);
   }
 
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
   .title {
     font-size: var(--font-size-3xl);
+  }
+
+  .subtitle {
+    font-size: var(--font-size-base);
+  }
+
+  .filterButtons {
+    width: 100%;
+  }
+
+  .filterButtons button {
+    flex: 1;
+    min-width: calc(50% - var(--spacing-1));
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .activeFilters {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

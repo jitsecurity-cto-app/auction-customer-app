@@ -72,7 +72,7 @@ describe('Navbar', () => {
     expect(logout).toHaveBeenCalled();
   });
 
-  it('should show Create Auction link when authenticated', () => {
+  it('should show Dashboard link when authenticated', () => {
     (isAuthenticated as jest.Mock).mockReturnValue(true);
     (getAuthUser as jest.Mock).mockReturnValue({
       id: '1',
@@ -83,14 +83,16 @@ describe('Navbar', () => {
 
     render(<Navbar />);
 
+    expect(screen.getByText('Dashboard')).toBeInTheDocument();
     expect(screen.getByText('Create Auction')).toBeInTheDocument();
   });
 
-  it('should not show Create Auction link when not authenticated', () => {
+  it('should not show Dashboard link when not authenticated', () => {
     (isAuthenticated as jest.Mock).mockReturnValue(false);
 
     render(<Navbar />);
 
+    expect(screen.queryByText('Dashboard')).not.toBeInTheDocument();
     expect(screen.queryByText('Create Auction')).not.toBeInTheDocument();
   });
 

@@ -16,6 +16,36 @@ jest.mock('../../../src/components/BidHistory', () => {
     return React.createElement('div', { 'data-testid': 'bid-history' }, 'Bid History');
   };
 });
+jest.mock('../../../src/components/WorkflowVisualization', () => {
+  const React = require('react');
+  return function MockWorkflowVisualization({ currentState }: { currentState: string }) {
+    return React.createElement('div', { 'data-testid': 'workflow-visualization' }, `Workflow: ${currentState}`);
+  };
+});
+jest.mock('../../../src/components/phases/ActiveBiddingPhase', () => {
+  const React = require('react');
+  return function MockActiveBiddingPhase() {
+    return React.createElement('div', { 'data-testid': 'active-bidding-phase' }, 'Active Bidding Phase');
+  };
+});
+jest.mock('../../../src/components/phases/PendingSalePhase', () => {
+  const React = require('react');
+  return function MockPendingSalePhase() {
+    return React.createElement('div', { 'data-testid': 'pending-sale-phase' }, 'Pending Sale Phase');
+  };
+});
+jest.mock('../../../src/components/phases/ShippedPhase', () => {
+  const React = require('react');
+  return function MockShippedPhase() {
+    return React.createElement('div', { 'data-testid': 'shipped-phase' }, 'Shipped Phase');
+  };
+});
+jest.mock('../../../src/components/phases/CompletePhase', () => {
+  const React = require('react');
+  return function MockCompletePhase() {
+    return React.createElement('div', { 'data-testid': 'complete-phase' }, 'Complete Phase');
+  };
+});
 
 describe('AuctionDetail', () => {
   beforeEach(() => {
@@ -115,6 +145,7 @@ describe('AuctionDetail', () => {
       current_bid: 150,
       end_time: new Date(Date.now() + 86400000).toISOString(),
       status: 'active',
+      workflow_state: 'active',
       created_by: 'user1',
       created_at: new Date().toISOString(),
     };
@@ -124,7 +155,55 @@ describe('AuctionDetail', () => {
     render(<AuctionDetail auctionId="1" />);
 
     await waitFor(() => {
-      expect(screen.getByTestId('bid-form')).toBeInTheDocument();
+      expect(screen.getByTestId('workflow-visualization')).toBeInTheDocument();
+      expect(screen.getByTestId('active-bidding-phase')).toBeInTheDocument();
+    });
+  });
+
+  it('should display workflow visualization', async () => {
+    const mockAuction = {
+      id: '1',
+      title: 'Test Auction',
+      description: 'Test Description',
+      starting_price: 100,
+      current_bid: 150,
+      end_time: new Date(Date.now() + 86400000).toISOString(),
+      status: 'active',
+      workflow_state: 'pending_sale',
+      created_by: 'user1',
+      created_at: new Date().toISOString(),
+    };
+
+    (api.get as jest.Mock).mockResolvedValue(mockAuction);
+
+    render(<AuctionDetail auctionId="1" />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('workflow-visualization')).toBeInTheDocument();
+      expect(screen.getByText(/Workflow: pending_sale/)).toBeInTheDocument();
+    });
+  });
+
+  it('should show pending sale phase when workflow state is pending_sale', async () => {
+    const mockAuction = {
+      id: '1',
+      title: 'Test Auction',
+      description: 'Test Description',
+      starting_price: 100,
+      current_bid: 150,
+      end_time: new Date(Date.now() - 86400000).toISOString(),
+      status: 'ended',
+      workflow_state: 'pending_sale',
+      created_by: 'user1',
+      created_at: new Date().toISOString(),
+    };
+
+    (api.get as jest.Mock).mockResolvedValue(mockAuction);
+
+    render(<AuctionDetail auctionId="1" />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('pending-sale-phase')).toBeInTheDocument();
     });
   });
 });

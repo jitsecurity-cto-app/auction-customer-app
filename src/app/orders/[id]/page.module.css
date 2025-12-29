@@ -1,0 +1,193 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0;
+  flex: 1;
+}
+
+.loading,
+.error,
+.notFound {
+  text-align: center;
+  padding: 3rem;
+}
+
+.error {
+  color: var(--color-error, #dc3545);
+}
+
+.errorCard {
+  background-color: var(--color-error-light, #f8d7da);
+  border-color: var(--color-error, #dc3545);
+  margin-bottom: 1rem;
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 2rem;
+}
+
+.mainSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.section {
+  width: 100%;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin: 0 0 1rem 0;
+}
+
+.auctionTitle {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0 0 0.5rem 0;
+  color: var(--color-primary, #007bff);
+  cursor: pointer;
+}
+
+.auctionTitle:hover {
+  text-decoration: underline;
+}
+
+.auctionDescription {
+  color: var(--color-text-secondary, #666);
+  margin: 0;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.infoLabel {
+  font-weight: 500;
+  color: var(--color-text-secondary, #666);
+  font-size: 0.875rem;
+}
+
+.infoValue {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.shippingAddress,
+.trackingInfo {
+  margin-bottom: 1rem;
+}
+
+.addressLabel,
+.trackingLabel {
+  font-weight: 500;
+  color: var(--color-text-secondary, #666);
+  margin-bottom: 0.25rem;
+}
+
+.addressValue,
+.trackingValue {
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.shippingUpdate {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border, #dee2e6);
+}
+
+.updateTitle {
+  font-size: 1rem;
+  font-weight: bold;
+  margin: 0 0 1rem 0;
+}
+
+.updateForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.input {
+  padding: 0.5rem;
+  border: 1px solid var(--color-border, #dee2e6);
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.contactCard {
+  width: 100%;
+}
+
+.contactTitle {
+  font-size: 1rem;
+  font-weight: bold;
+  margin: 0 0 1rem 0;
+}
+
+.contactName {
+  font-weight: 600;
+  font-size: 1.125rem;
+  margin: 0 0 0.5rem 0;
+}
+
+.contactEmail,
+.contactPhone,
+.contactAddress {
+  color: var(--color-text-secondary, #666);
+  margin: 0.25rem 0;
+  word-break: break-word;
+}
+
+@media (max-width: 968px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

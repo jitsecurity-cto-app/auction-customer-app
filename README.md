@@ -13,6 +13,10 @@ The Customer App is a Next.js application that provides the public-facing interf
 - Place bids on auctions (requires authentication)
 - User registration and login
 - View bidding history
+- Order management (create orders for won auctions)
+- View order status and shipping information
+- Update shipping tracking (for sellers)
+- Contact information display (buyer/seller)
 - Navigation between pages
 - Real-time auction updates (basic)
 
@@ -98,6 +102,7 @@ customer-app/
 │   │   ├── AuctionDetail.tsx # Auction details view
 │   │   ├── BidForm.tsx        # Bid placement form
 │   │   ├── BidHistory.tsx     # Bid history table
+│   │   ├── OrderForm.tsx      # Order creation form (for winners)
 │   │   ├── LoginForm.tsx      # Login form component
 │   │   └── RegisterForm.tsx  # Registration form component
 │   ├── lib/              # Utilities
@@ -155,8 +160,12 @@ const bid = await api.post<Bid>('/auctions/1/bids', { amount: 200 }, true);
 - `/` - Homepage with active auctions
 - `/auctions` - All auctions listing
 - `/auctions/[id]` - Auction detail page with bid form and history
+- `/dashboard` - Unified dashboard showing all user activity (auctions, bids, wins, sales) organized by workflow state
+- `/orders` - List user's orders (as buyer or seller)
+- `/orders/[id]` - Order detail page with shipping information
 - `/login` - User login page
 - `/register` - User registration page
+- `/profile` - User profile page
 
 ### Authentication
 

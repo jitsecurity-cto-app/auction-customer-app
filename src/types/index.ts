@@ -6,6 +6,8 @@ export interface User {
   name: string;
   role: 'user' | 'admin';
   password_hash?: string; // Intentionally exposed in API (security vulnerability)
+  phone?: string;
+  address?: string;
   created_at: string;
 }
 
@@ -33,7 +35,10 @@ export interface Auction {
   current_bid: number;
   end_time: string;
   status: 'active' | 'ended' | 'cancelled';
+  workflow_state?: 'active' | 'pending_sale' | 'shipping' | 'complete';
   created_by: string;
+  winner_id?: string;
+  closed_at?: string;
   created_at: string;
 }
 
@@ -44,6 +49,25 @@ export interface Bid {
   amount: number;
   created_at: string;
   user?: User;
+}
+
+export interface Order {
+  id: string;
+  auction_id: string;
+  buyer_id: string;
+  seller_id: string;
+  winning_bid_id?: string;
+  total_amount: number;
+  payment_status: 'pending' | 'paid' | 'refunded';
+  shipping_address?: string;
+  shipping_status: 'pending' | 'shipped' | 'delivered';
+  tracking_number?: string;
+  status: 'pending_payment' | 'paid' | 'shipped' | 'delivered' | 'completed' | 'cancelled';
+  created_at: string;
+  updated_at: string;
+  auction?: Auction;
+  buyer?: User;
+  seller?: User;
 }
 
 export interface ApiError {

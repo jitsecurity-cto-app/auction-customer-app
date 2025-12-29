@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
 import { Bid } from '../types';
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Card, CardHeader, CardTitle } from '@design-system/components';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Badge } from '@design-system/components';
 import { formatCurrency, formatDateTime } from '@design-system/utils';
 import styles from './BidHistory.module.css';
 
@@ -30,11 +30,9 @@ export default function BidHistory({ auctionId }: BidHistoryProps) {
         setLoading(true);
         setError(null);
         
-        // No validation of auctionId (intentional vulnerability)
         const data = await api.get<BidWithUser[]>(`/auctions/${auctionId}/bids`);
         setBids(Array.isArray(data) ? data : []);
       } catch (err) {
-        // Intentionally verbose error messages (security vulnerability)
         const errorMessage = err instanceof Error 
           ? err.message 
           : 'Failed to load bids';
@@ -67,43 +65,75 @@ export default function BidHistory({ auctionId }: BidHistoryProps) {
   if (bids.length === 0) {
     return (
       <div className={styles.empty}>
-        <p>No bids yet. Be the first to bid!</p>
+        <p className={styles.emptyText}>No bids yet. Be the first to bid!</p>
       </div>
     );
   }
 
+  // Sort bids by amount descending, then by time descending
+  const sortedBids = [...bids].sort((a, b) => {
+    if (b.amount !== a.amount) {
+      return b.amount - a.amount;
+    }
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+
+  const highestBid = sortedBids[0];
+
   return (
     <div className={styles.container}>
-      <Card variant="elevated" padding="md">
-        <CardHeader>
-          <CardTitle>Bid History</CardTitle>
-        </CardHeader>
-        <Table striped>
+      <div className={styles.summary}>
+        <div className={styles.summaryItem}>
+          <span className={styles.summaryLabel}>Total Bids:</span>
+          <span className={styles.summaryValue}>{bids.length}</span>
+        </div>
+        {highestBid && (
+          <div className={styles.summaryItem}>
+            <span className={styles.summaryLabel}>Highest Bid:</span>
+            <span className={styles.summaryValue}>{formatCurrency(highestBid.amount)}</span>
+          </div>
+        )}
+      </div>
+
+      <div className={styles.tableWrapper}>
+        <Table striped hover>
           <TableHeader>
             <TableRow>
+              <TableHead>Rank</TableHead>
               <TableHead>Bidder</TableHead>
               <TableHead style={{ textAlign: 'right' }}>Amount</TableHead>
               <TableHead style={{ textAlign: 'right' }}>Time</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {bids.map((bid) => (
-              <TableRow key={bid.id}>
+            {sortedBids.map((bid, index) => (
+              <TableRow key={bid.id} className={index === 0 ? styles.highestBid : ''}>
                 <TableCell>
-                  {bid.user?.name || bid.user?.email || `User ${bid.user_id}`}
+                  <Badge variant={index === 0 ? 'success' : 'default'} size="sm">
+                    #{index + 1}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <div className={styles.bidderInfo}>
+                    <span className={styles.bidderName}>
+                      {bid.user?.name || bid.user?.email || `User ${bid.user_id}`}
+                    </span>
+                    {index === 0 && (
+                      <Badge variant="success" size="sm">Highest</Badge>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell style={{ textAlign: 'right', fontWeight: 'var(--font-weight-bold)' }}>
                   {formatCurrency(bid.amount || 0)}
                 </TableCell>
                 <TableCell style={{ textAlign: 'right' }}>
-                  {formatDateTime(bid.created_at)}
+                  <span className={styles.timeText}>{formatDateTime(bid.created_at)}</span>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-      </Card>
+      </div>
     </div>
   );
 }
-

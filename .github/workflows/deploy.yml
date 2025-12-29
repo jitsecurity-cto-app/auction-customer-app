@@ -27,6 +27,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Validate required secrets
+        run: |
+          if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ]; then
+            echo "❌ Error: AWS_ACCESS_KEY_ID secret is missing"
+            exit 1
+          fi
+          if [ -z "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ]; then
+            echo "❌ Error: AWS_SECRET_ACCESS_KEY secret is missing"
+            exit 1
+          fi
+          if [ -z "${{ secrets.NEXT_PUBLIC_API_URL }}" ] && [ -z "${{ secrets.API_URL }}" ]; then
+            echo "⚠️  Warning: NEXT_PUBLIC_API_URL or API_URL secret is missing"
+            echo "   Build will continue but API calls may fail"
+          fi
+          echo "✅ All required secrets are present"
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -90,14 +106,42 @@ jobs:
         id: terraform
         working-directory: ./terraform
         run: |
-          echo "s3_bucket=$(terraform output -raw s3_bucket_name)" >> $GITHUB_OUTPUT
-          echo "cloudfront_id=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_OUTPUT
-          echo "website_url=$(terraform output -raw website_url)" >> $GITHUB_OUTPUT
+          S3_BUCKET=$(terraform output -raw s3_bucket_name 2>/dev/null || echo "")
+          CLOUDFRONT_ID=$(terraform output -raw cloudfront_distribution_id 2>/dev/null || echo "")
+          WEBSITE_URL=$(terraform output -raw website_url 2>/dev/null || echo "")
+          
+          if [ -z "$S3_BUCKET" ]; then
+            echo "❌ Error: S3 bucket name is empty or not found"
+            exit 1
+          fi
+          if [ -z "$CLOUDFRONT_ID" ]; then
+            echo "❌ Error: CloudFront distribution ID is empty or not found"
+            exit 1
+          fi
+          
+          echo "s3_bucket=$S3_BUCKET" >> $GITHUB_OUTPUT
+          echo "cloudfront_id=$CLOUDFRONT_ID" >> $GITHUB_OUTPUT
+          echo "website_url=$WEBSITE_URL" >> $GITHUB_OUTPUT
+          echo "✅ Terraform outputs retrieved successfully"
 
       - name: Build Next.js application
         env:
+          NODE_ENV: production
+          SKIP_STATIC_EXPORT: false
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || secrets.API_URL || '' }}
         run: npm run build
+
+      - name: Verify build output
+        run: |
+          if [ ! -d "./out" ]; then
+            echo "❌ Error: Build output directory 'out' does not exist"
+            exit 1
+          fi
+          if [ ! -f "./out/index.html" ]; then
+            echo "❌ Error: Build output is missing index.html"
+            exit 1
+          fi
+          echo "✅ Build output verified"
 
       - name: Deploy to S3
         run: |
@@ -106,9 +150,20 @@ jobs:
 
       - name: Invalidate CloudFront cache
         run: |
-          aws cloudfront create-invalidation \
+          INVALIDATION_ID=$(aws cloudfront create-invalidation \
             --distribution-id ${{ steps.terraform.outputs.cloudfront_id }} \
-            --paths "/*"
+            --paths "/*" \
+            --query 'Invalidation.Id' \
+            --output text 2>&1)
+          
+          if [ $? -ne 0 ]; then
+            echo "❌ Error: Failed to create CloudFront invalidation"
+            echo "$INVALIDATION_ID"
+            exit 1
+          fi
+          
+          echo "✅ CloudFront invalidation created: $INVALIDATION_ID"
+          echo "   Note: Invalidation may take 5-15 minutes to complete"
 
       - name: Deployment summary
         run: |

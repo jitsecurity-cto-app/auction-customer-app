@@ -75,10 +75,28 @@ export async function apiRequest<T>(
 
     // Intentionally verbose error logging (security vulnerability)
     if (!response.ok) {
-      const errorData: ApiError = await response.json().catch(() => ({
-        error: 'Unknown error',
-        message: `HTTP ${response.status}: ${response.statusText}`,
-      }));
+      let errorData: ApiError;
+      try {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          errorData = await response.json();
+        } else {
+          // If response is not JSON, read as text but don't expose raw content
+          const text = await response.text();
+          // Only use first 200 chars to avoid exposing large error pages
+          const preview = text.length > 200 ? text.substring(0, 200) + '...' : text;
+          errorData = {
+            error: 'API Error',
+            message: `HTTP ${response.status}: ${response.statusText}`,
+          };
+          console.error('Non-JSON error response preview:', preview);
+        }
+      } catch (parseError) {
+        errorData = {
+          error: 'Unknown error',
+          message: `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
 
       console.error('API Error:', {
         status: response.status,
@@ -225,6 +243,139 @@ export const api = {
       method: 'PUT',
       body: JSON.stringify(data),
     });
+  },
+
+
+  // Payment status endpoints
+  async updatePaymentStatus(bidId: number, paymentStatus: string) {
+    return apiRequest<any>(`/bids/${bidId}/payment-status`, {
+      method: 'PUT',
+      body: JSON.stringify({ payment_status: paymentStatus }),
+    });
+  },
+
+  // Order endpoints
+  async getOrders(params?: {
+    buyer_id?: string;
+    seller_id?: string;
+    status?: string;
+    payment_status?: string;
+    shipping_status?: string;
+    limit?: number;
+    offset?: number;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params?.buyer_id) queryParams.append('buyer_id', params.buyer_id);
+    if (params?.seller_id) queryParams.append('seller_id', params.seller_id);
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.payment_status) queryParams.append('payment_status', params.payment_status);
+    if (params?.shipping_status) queryParams.append('shipping_status', params.shipping_status);
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.offset) queryParams.append('offset', params.offset.toString());
+    
+    const queryString = queryParams.toString();
+    const endpoint = queryString ? `/orders?${queryString}` : '/orders';
+    return apiRequest<ApiResponse<any[]>>(endpoint);
+  },
+
+  async getOrderById(id: string) {
+    return apiRequest<ApiResponse<any>>(`/orders/${id}`);
+  },
+
+  async createOrder(data: {
+    auction_id: string;
+    shipping_address: string;
+  }) {
+    return apiRequest<any>('/orders', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      requireAuth: true,
+    });
+  },
+
+  async updateOrder(id: string, data: Partial<any>) {
+    return apiRequest<ApiResponse<any>>(`/orders/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Auction closure endpoints
+  async closeAuction(id: string) {
+    return apiRequest<any>(`/auctions/${id}/close`, {
+      method: 'POST',
+    });
+  },
+
+  async closeExpiredAuctions() {
+    return apiRequest<any>('/auctions/close-expired', {
+      method: 'POST',
+    });
+  },
+
+  // Workflow endpoints
+  async getAuctionsByWorkflow(params?: {
+    workflow_state?: string;
+    role?: 'seller' | 'buyer';
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params?.workflow_state) queryParams.append('workflow_state', params.workflow_state);
+    if (params?.role) queryParams.append('role', params.role);
+    
+    const queryString = queryParams.toString();
+    const endpoint = queryString ? `/auctions/workflow?${queryString}` : '/auctions/workflow';
+    try {
+      const response = await apiRequest<any>(endpoint, { requireAuth: true });
+      // Handle both array and object with data property
+      if (Array.isArray(response)) {
+        return response;
+      } else if (response && Array.isArray(response.data)) {
+        return response.data;
+      } else if (response && response.data) {
+        return [response.data];
+      }
+      return [];
+    } catch (error) {
+      console.error('getAuctionsByWorkflow error:', error);
+      throw error;
+    }
+  },
+
+  async updateWorkflowState(auctionId: string, workflowState: string) {
+    return apiRequest<any>(`/auctions/${auctionId}/workflow`, {
+      method: 'PUT',
+      body: JSON.stringify({ workflow_state: workflowState }),
+      requireAuth: true,
+    });
+  },
+
+  // Dispute endpoints
+  async createDispute(data: {
+    auction_id: string;
+    order_id?: string;
+    reason: string;
+    filed_by_role: 'seller' | 'buyer';
+  }) {
+    return apiRequest<any>('/disputes', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      requireAuth: true,
+    });
+  },
+
+  async getDisputes(params?: {
+    auction_id?: string;
+    order_id?: string;
+    status?: string;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params?.auction_id) queryParams.append('auction_id', params.auction_id);
+    if (params?.order_id) queryParams.append('order_id', params.order_id);
+    if (params?.status) queryParams.append('status', params.status);
+    
+    const queryString = queryParams.toString();
+    const endpoint = queryString ? `/disputes?${queryString}` : '/disputes';
+    return apiRequest<any[]>(endpoint);
   },
 };
 

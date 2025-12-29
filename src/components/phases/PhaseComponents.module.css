@@ -1,0 +1,202 @@
+.phaseContainer {
+  width: 100%;
+  margin: 0;
+}
+
+.sellerCard {
+  border-left: 4px solid var(--color-info);
+  background-color: var(--bg-elevated) !important;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-base);
+}
+
+.sellerCard:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+}
+
+.buyerCard {
+  border-left: 4px solid var(--color-success);
+  background-color: var(--bg-elevated) !important;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-base);
+}
+
+.buyerCard:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+}
+
+.shippedCard {
+  border-left: 4px solid var(--color-warning);
+  background-color: var(--bg-elevated) !important;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-base);
+}
+
+.shippedCard:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+}
+
+.completeCard {
+  border-left: 4px solid var(--color-success);
+  background-color: var(--bg-elevated) !important;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-base);
+}
+
+.completeCard:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+}
+
+.stats {
+  display: flex;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+  flex-wrap: wrap;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.statLabel {
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+}
+
+.statValue {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+}
+
+.actions {
+  margin: var(--spacing-4) 0;
+}
+
+.section {
+  margin-top: var(--spacing-6);
+}
+
+.sectionTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-3);
+  color: var(--text-primary);
+}
+
+.bidInfo {
+  margin-bottom: var(--spacing-4);
+  padding: var(--spacing-3);
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-primary);
+}
+
+.currentBidText {
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--spacing-2);
+}
+
+.startingPriceText {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.orderSummary {
+  margin-bottom: var(--spacing-4);
+  padding: var(--spacing-3);
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-primary);
+}
+
+.summaryItem {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-2);
+  padding-bottom: var(--spacing-2);
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.summaryItem:last-child {
+  border-bottom: none;
+}
+
+.formSection {
+  margin: var(--spacing-4) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.orderDetails {
+  margin-bottom: var(--spacing-4);
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-2) 0;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.detailRow:last-child {
+  border-bottom: none;
+}
+
+.detailLabel {
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+}
+
+.infoText {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  margin: var(--spacing-3) 0;
+}
+
+.shippingInfo {
+  margin-bottom: var(--spacing-4);
+}
+
+.trackingLink {
+  color: var(--color-info);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.trackingLink:hover {
+  color: var(--color-info-dark);
+  text-decoration: underline;
+}
+
+.buyerActions {
+  margin-top: var(--spacing-4);
+  padding-top: var(--spacing-4);
+  border-top: 1px solid var(--border-primary);
+}
+
+.sellerInfo {
+  margin-top: var(--spacing-4);
+}
+
+.completionInfo {
+  margin-bottom: var(--spacing-4);
+  padding: var(--spacing-3);
+  background-color: rgba(16, 185, 129, 0.1);
+  border: 1px solid var(--color-success);
+  border-radius: var(--radius-md);
+}
+
+.disputeSection {
+  margin-top: var(--spacing-6);
+  padding-top: var(--spacing-4);
+  border-top: 2px solid var(--border-primary);
+}

@@ -1,0 +1,151 @@
+.container {
+  width: 100%;
+}
+
+.workflowSteps {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) 0;
+}
+
+.stepContainer {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-2);
+  flex: 1;
+  min-width: 120px;
+}
+
+.stepCircle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-bold);
+  border: 3px solid var(--border-primary);
+  background-color: var(--bg-secondary);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.stepCircle.completed {
+  background-color: var(--color-success);
+  border-color: var(--color-success);
+  color: var(--text-primary);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+}
+
+.stepCircle.active {
+  background-color: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-inverse);
+  box-shadow: 0 0 0 4px rgba(255, 199, 44, 0.3), var(--shadow-yellow);
+  animation: pulse 2s infinite;
+}
+
+.stepCircle.pending {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-primary);
+  color: var(--text-tertiary);
+}
+
+.checkmark {
+  font-size: var(--font-size-xl);
+  line-height: 1;
+  font-weight: var(--font-weight-bold);
+}
+
+.activeDot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: var(--text-inverse);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+}
+
+.pendingDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--text-tertiary);
+}
+
+.stepBadge {
+  text-align: center;
+  white-space: nowrap;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  margin-top: var(--spacing-1);
+}
+
+.arrow {
+  font-size: var(--font-size-2xl);
+  color: var(--text-tertiary);
+  margin: 0 var(--spacing-2);
+  flex-shrink: 0;
+  font-weight: var(--font-weight-bold);
+  transition: color 0.3s ease;
+}
+
+.arrow.completed {
+  color: var(--color-success);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.05);
+  }
+}
+
+@media (max-width: 768px) {
+  .workflowSteps {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-3);
+  }
+
+  .stepContainer {
+    flex-direction: row;
+    width: 100%;
+  }
+
+  .step {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-3);
+    min-width: auto;
+  }
+
+  .arrow {
+    transform: rotate(90deg);
+    margin: var(--spacing-2) 0;
+  }
+
+  .stepBadge {
+    font-size: var(--font-size-xs);
+    margin-top: 0;
+  }
+
+  .stepCircle {
+    width: 40px;
+    height: 40px;
+  }
+}
