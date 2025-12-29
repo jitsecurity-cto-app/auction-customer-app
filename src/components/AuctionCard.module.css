@@ -1,0 +1,51 @@
+.cardLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.auctionCard {
+  height: 100%;
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.auctionCard:hover {
+  transform: translateY(-2px);
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-4);
+}
+
+.priceSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.currentBid {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--accent-primary);
+}
+
+.startingPrice {
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+}
+
+.statusSection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--spacing-2);
+}
+
+.timeRemaining {
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+}

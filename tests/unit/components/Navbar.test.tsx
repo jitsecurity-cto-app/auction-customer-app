@@ -71,5 +71,54 @@ describe('Navbar', () => {
 
     expect(logout).toHaveBeenCalled();
   });
+
+  it('should show Create Auction link when authenticated', () => {
+    (isAuthenticated as jest.Mock).mockReturnValue(true);
+    (getAuthUser as jest.Mock).mockReturnValue({
+      id: '1',
+      email: 'test@example.com',
+      name: 'Test User',
+      role: 'user',
+    });
+
+    render(<Navbar />);
+
+    expect(screen.getByText('Create Auction')).toBeInTheDocument();
+  });
+
+  it('should not show Create Auction link when not authenticated', () => {
+    (isAuthenticated as jest.Mock).mockReturnValue(false);
+
+    render(<Navbar />);
+
+    expect(screen.queryByText('Create Auction')).not.toBeInTheDocument();
+  });
+
+  it('should highlight active route', () => {
+    const { usePathname } = require('next/navigation');
+    (isAuthenticated as jest.Mock).mockReturnValue(true);
+    (getAuthUser as jest.Mock).mockReturnValue({
+      id: '1',
+      email: 'test@example.com',
+      name: 'Test User',
+    });
+
+    // Test auctions route highlighting
+    (usePathname as jest.Mock).mockReturnValue('/auctions');
+    const { rerender } = render(<Navbar />);
+    
+    const auctionsLink = screen.getByText('Auctions').closest('a');
+    // Check that the link exists and has the correct href
+    expect(auctionsLink).toBeInTheDocument();
+    expect(auctionsLink).toHaveAttribute('href', '/auctions');
+
+    // Test profile route highlighting
+    (usePathname as jest.Mock).mockReturnValue('/profile');
+    rerender(<Navbar />);
+    
+    const profileLink = screen.getByText('Profile').closest('a');
+    expect(profileLink).toBeInTheDocument();
+    expect(profileLink).toHaveAttribute('href', '/profile');
+  });
 });
 

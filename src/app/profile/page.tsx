@@ -5,6 +5,8 @@ import { useSearchParams } from 'next/navigation';
 import { getAuthUser, isAuthenticated } from '@/lib/auth';
 import UserProfile from '@/components/UserProfile';
 import Link from 'next/link';
+import { Button, Card } from '@design-system/components';
+import styles from './page.module.css';
 
 function ProfileContent() {
   const searchParams = useSearchParams();
@@ -31,7 +33,7 @@ function ProfileContent() {
 
   if (loading) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
+      <div className={styles.loading}>
         <p>Loading...</p>
       </div>
     );
@@ -39,55 +41,25 @@ function ProfileContent() {
 
   if (!userId) {
     return (
-      <div style={{ 
-        maxWidth: '600px', 
-        margin: '0 auto', 
-        padding: '2rem',
-        textAlign: 'center'
-      }}>
-        <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>
-          Profile
-        </h1>
-        <p style={{ marginBottom: '1.5rem', color: '#6b7280' }}>
+      <div className={styles.notLoggedIn}>
+        <h1 className={styles.title}>Profile</h1>
+        <p className={styles.message}>
           You must be logged in to view your profile.
         </p>
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-          <Link
-            href="/login"
-            style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              textDecoration: 'none',
-              borderRadius: '0.25rem'
-            }}
-          >
-            Login
+        <div className={styles.actions}>
+          <Link href="/login">
+            <Button variant="primary">Login</Button>
           </Link>
-          <Link
-            href="/register"
-            style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: '#6b7280',
-              color: 'white',
-              textDecoration: 'none',
-              borderRadius: '0.25rem'
-            }}
-          >
-            Register
+          <Link href="/register">
+            <Button variant="secondary">Register</Button>
           </Link>
         </div>
-        <div style={{ 
-          marginTop: '2rem',
-          padding: '1rem',
-          backgroundColor: '#fef3c7',
-          borderRadius: '0.5rem',
-          fontSize: '0.875rem',
-          color: '#92400e'
-        }}>
-          <strong>IDOR Vulnerability:</strong> You can access any user's profile by adding <code>?id=USER_ID</code> to the URL.
-          No authorization checks are performed.
-        </div>
+        <Card variant="outlined" padding="md" className={styles.warningCard}>
+          <p className={styles.warningText}>
+            <strong>IDOR Vulnerability:</strong> You can access any user's profile by adding <code>?id=USER_ID</code> to the URL.
+            No authorization checks are performed.
+          </p>
+        </Card>
       </div>
     );
   }
@@ -96,16 +68,12 @@ function ProfileContent() {
     <div>
       {/* IDOR vulnerability notice (for lab purposes) */}
       {searchParams.get('id') && searchParams.get('id') !== getAuthUser()?.id && (
-        <div style={{ 
-          padding: '1rem',
-          backgroundColor: '#fee2e2',
-          borderBottom: '1px solid #fecaca',
-          color: '#991b1b',
-          fontSize: '0.875rem'
-        }}>
-          <strong>IDOR Vulnerability Active:</strong> You are viewing another user's profile. 
-          No authorization check was performed. You can edit this profile.
-        </div>
+        <Card variant="outlined" padding="md" className={styles.vulnerabilityNotice}>
+          <p className={styles.vulnerabilityText}>
+            <strong>IDOR Vulnerability Active:</strong> You are viewing another user's profile. 
+            No authorization check was performed. You can edit this profile.
+          </p>
+        </Card>
       )}
       <UserProfile userId={userId} />
     </div>
@@ -115,7 +83,7 @@ function ProfileContent() {
 export default function ProfilePage() {
   return (
     <Suspense fallback={
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
+      <div className={styles.loading}>
         <p>Loading...</p>
       </div>
     }>

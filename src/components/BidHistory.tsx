@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
 import { Bid } from '../types';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Card, CardHeader, CardTitle } from '@design-system/components';
+import { formatCurrency, formatDateTime } from '@design-system/utils';
+import styles from './BidHistory.module.css';
 
 interface BidHistoryProps {
   auctionId: string;
@@ -47,7 +50,7 @@ export default function BidHistory({ auctionId }: BidHistoryProps) {
 
   if (loading) {
     return (
-      <div style={{ padding: '1rem', textAlign: 'center' }}>
+      <div className={styles.loading}>
         <p>Loading bid history...</p>
       </div>
     );
@@ -55,7 +58,7 @@ export default function BidHistory({ auctionId }: BidHistoryProps) {
 
   if (error) {
     return (
-      <div style={{ padding: '1rem', textAlign: 'center', color: '#ef4444' }}>
+      <div className={styles.error}>
         <p>Error: {error}</p>
       </div>
     );
@@ -63,57 +66,43 @@ export default function BidHistory({ auctionId }: BidHistoryProps) {
 
   if (bids.length === 0) {
     return (
-      <div style={{ padding: '1rem', textAlign: 'center' }}>
+      <div className={styles.empty}>
         <p>No bids yet. Be the first to bid!</p>
       </div>
     );
   }
 
   return (
-    <div style={{ marginTop: '2rem' }}>
-      <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>Bid History</h3>
-      <div style={{ 
-        border: '1px solid #e5e7eb', 
-        borderRadius: '0.5rem',
-        overflow: 'hidden'
-      }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ backgroundColor: '#f3f4f6' }}>
-              <th style={{ padding: '0.75rem', textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>
-                Bidder
-              </th>
-              <th style={{ padding: '0.75rem', textAlign: 'right', borderBottom: '1px solid #e5e7eb' }}>
-                Amount
-              </th>
-              <th style={{ padding: '0.75rem', textAlign: 'right', borderBottom: '1px solid #e5e7eb' }}>
-                Time
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {bids.map((bid, index) => (
-              <tr 
-                key={bid.id}
-                style={{ 
-                  backgroundColor: index % 2 === 0 ? 'white' : '#f9fafb',
-                  borderBottom: index < bids.length - 1 ? '1px solid #e5e7eb' : 'none'
-                }}
-              >
-                <td style={{ padding: '0.75rem' }}>
+    <div className={styles.container}>
+      <Card variant="elevated" padding="md">
+        <CardHeader>
+          <CardTitle>Bid History</CardTitle>
+        </CardHeader>
+        <Table striped>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Bidder</TableHead>
+              <TableHead style={{ textAlign: 'right' }}>Amount</TableHead>
+              <TableHead style={{ textAlign: 'right' }}>Time</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {bids.map((bid) => (
+              <TableRow key={bid.id}>
+                <TableCell>
                   {bid.user?.name || bid.user?.email || `User ${bid.user_id}`}
-                </td>
-                <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: 'bold' }}>
-                  ${bid.amount.toFixed(2)}
-                </td>
-                <td style={{ padding: '0.75rem', textAlign: 'right', color: '#6b7280', fontSize: '0.875rem' }}>
-                  {new Date(bid.created_at).toLocaleString()}
-                </td>
-              </tr>
+                </TableCell>
+                <TableCell style={{ textAlign: 'right', fontWeight: 'var(--font-weight-bold)' }}>
+                  {formatCurrency(bid.amount || 0)}
+                </TableCell>
+                <TableCell style={{ textAlign: 'right' }}>
+                  {formatDateTime(bid.created_at)}
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </Card>
     </div>
   );
 }

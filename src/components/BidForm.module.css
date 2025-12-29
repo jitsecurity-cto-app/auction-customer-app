@@ -1,0 +1,53 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.inputWrapper {
+  width: 100%;
+}
+
+.currencySymbol {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+.loginPrompt {
+  text-align: center;
+}
+
+.loginText {
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.loginLink {
+  color: var(--accent-primary);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+}
+
+.loginLink:hover {
+  color: var(--accent-primary-hover);
+  text-decoration: underline;
+}
+
+.errorMessage {
+  padding: var(--spacing-3);
+  background-color: rgba(239, 68, 68, 0.2);
+  color: var(--color-error);
+  border: 1px solid var(--color-error);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.successMessage {
+  padding: var(--spacing-3);
+  background-color: rgba(16, 185, 129, 0.2);
+  color: var(--color-success);
+  border: 1px solid var(--color-success);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}

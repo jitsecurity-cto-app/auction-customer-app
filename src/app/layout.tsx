@@ -1,5 +1,8 @@
 import Navbar from '../components/Navbar';
 import './globals.css';
+// Import design system theme CSS directly
+import '../../../design-system/src/theme/reset.css';
+import '../../../design-system/src/theme/theme.css';
 
 export const metadata = {
   title: 'Auction Platform - Customer',
@@ -13,7 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body style={{ margin: 0, fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+      <body>
         <Navbar />
         {children}
       </body>

@@ -1,0 +1,15 @@
+.container {
+  margin-top: var(--spacing-8);
+}
+
+.loading,
+.error,
+.empty {
+  padding: var(--spacing-4);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.error {
+  color: var(--color-error);
+}

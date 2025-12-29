@@ -4,13 +4,23 @@ import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
 import { Auction } from '../types';
 import AuctionCard from './AuctionCard';
+import styles from './AuctionList.module.css';
 
 interface AuctionListProps {
   status?: 'active' | 'ended' | 'cancelled';
   limit?: number;
+  search?: string;
+  minPrice?: number;
+  maxPrice?: number;
 }
 
-export default function AuctionList({ status, limit = 50 }: AuctionListProps) {
+export default function AuctionList({ 
+  status, 
+  limit = 50,
+  search,
+  minPrice,
+  maxPrice
+}: AuctionListProps) {
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,14 +31,18 @@ export default function AuctionList({ status, limit = 50 }: AuctionListProps) {
         setLoading(true);
         setError(null);
         
-        // Build query string (no validation - intentional vulnerability)
-        let endpoint = '/auctions?';
-        if (status) {
-          endpoint += `status=${status}&`;
-        }
-        endpoint += `limit=${limit}`;
-
-        const data = await api.get<Auction[]>(endpoint);
+        // Use API client method with search and price filters
+        // No input validation (intentional vulnerability)
+        const response = await api.getAuctions({
+          status,
+          search,
+          minPrice,
+          maxPrice,
+          limit,
+        });
+        
+        // Handle both wrapped and unwrapped responses
+        const data = Array.isArray(response) ? response : (response as any)?.data || [];
         setAuctions(Array.isArray(data) ? data : []);
       } catch (err) {
         // Intentionally verbose error messages (security vulnerability)
@@ -43,11 +57,11 @@ export default function AuctionList({ status, limit = 50 }: AuctionListProps) {
     }
 
     fetchAuctions();
-  }, [status, limit]);
+  }, [status, limit, search, minPrice, maxPrice]);
 
   if (loading) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
+      <div className={styles.loading}>
         <p>Loading auctions...</p>
       </div>
     );
@@ -55,7 +69,7 @@ export default function AuctionList({ status, limit = 50 }: AuctionListProps) {
 
   if (error) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center', color: '#ef4444' }}>
+      <div className={styles.error}>
         <p>Error: {error}</p>
       </div>
     );
@@ -63,19 +77,14 @@ export default function AuctionList({ status, limit = 50 }: AuctionListProps) {
 
   if (auctions.length === 0) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
+      <div className={styles.empty}>
         <p>No auctions found.</p>
       </div>
     );
   }
 
   return (
-    <div style={{ 
-      display: 'grid', 
-      gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-      gap: '1.5rem',
-      padding: '2rem'
-    }}>
+    <div className={styles.grid}>
       {auctions.map((auction) => (
         <AuctionCard key={auction.id} auction={auction} />
       ))}

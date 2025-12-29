@@ -1,82 +1,70 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Auction } from '../types';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter, Badge } from '@design-system/components';
+import { formatCurrency, formatTimeRemaining } from '@design-system/utils';
+import styles from './AuctionCard.module.css';
 
 interface AuctionCardProps {
   auction: Auction;
 }
 
 export default function AuctionCard({ auction }: AuctionCardProps) {
-  const endDate = new Date(auction.end_time);
-  const isEnded = auction.status === 'ended' || endDate < new Date();
-  const timeRemaining = isEnded 
-    ? 'Ended' 
-    : `${Math.floor((endDate.getTime() - Date.now()) / (1000 * 60 * 60))}h remaining`;
+  const [timeRemaining, setTimeRemaining] = useState<string>('');
+  const [isEnded, setIsEnded] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Calculate time-based values only on client to avoid hydration mismatch
+    const endDate = new Date(auction.end_time);
+    const ended = auction.status === 'ended' || endDate < new Date();
+    setIsEnded(ended);
+    
+    if (ended) {
+      setTimeRemaining('Ended');
+    } else {
+      const updateTimeRemaining = () => {
+        setTimeRemaining(formatTimeRemaining(endDate));
+      };
+      
+      updateTimeRemaining();
+      const interval = setInterval(updateTimeRemaining, 60000); // Update every minute
+      return () => clearInterval(interval);
+    }
+  }, [auction.end_time, auction.status]);
+
+  const statusVariant = isEnded ? 'error' : 'success';
 
   return (
-    <Link 
-      href={`/auctions/${auction.id}`}
-      style={{
-        display: 'block',
-        padding: '1.5rem',
-        border: '1px solid #e5e7eb',
-        borderRadius: '0.5rem',
-        textDecoration: 'none',
-        color: 'inherit',
-        transition: 'box-shadow 0.2s',
-        backgroundColor: 'white'
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = 'none';
-      }}
-    >
-      <h3 style={{ 
-        margin: '0 0 0.5rem 0', 
-        fontSize: '1.25rem',
-        color: '#1f2937'
-      }}>
-        {auction.title}
-      </h3>
-      <div 
-        style={{ 
-          marginBottom: '1rem',
-          color: '#6b7280',
-          fontSize: '0.875rem'
-        }}
-        // XSS vulnerability: using dangerouslySetInnerHTML without sanitization
-        dangerouslySetInnerHTML={{ __html: auction.description }}
-      />
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        marginTop: '1rem'
-      }}>
-        <div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#3b82f6' }}>
-            ${auction.current_bid.toFixed(2)}
+    <Link href={`/auctions/${auction.id}`} className={styles.cardLink}>
+      <Card variant="elevated" padding="md" className={styles.auctionCard}>
+        <CardHeader>
+          <CardTitle>{auction.title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div
+            // XSS vulnerability: using dangerouslySetInnerHTML without sanitization
+            dangerouslySetInnerHTML={{ __html: auction.description }}
+          />
+        </CardContent>
+        <CardFooter className={styles.cardFooter}>
+          <div className={styles.priceSection}>
+            <div className={styles.currentBid}>
+              {formatCurrency(auction.current_bid || auction.starting_price)}
+            </div>
+            <div className={styles.startingPrice}>
+              Starting: {formatCurrency(auction.starting_price)}
+            </div>
           </div>
-          <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-            Starting: ${auction.starting_price.toFixed(2)}
+          <div className={styles.statusSection}>
+            <Badge variant={statusVariant} size="sm">
+              {auction.status}
+            </Badge>
+            <div className={styles.timeRemaining}>{timeRemaining}</div>
           </div>
-        </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ 
-            fontSize: '0.875rem', 
-            color: isEnded ? '#ef4444' : '#10b981',
-            fontWeight: 'bold'
-          }}>
-            {auction.status.toUpperCase()}
-          </div>
-          <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-            {timeRemaining}
-          </div>
-        </div>
-      </div>
+        </CardFooter>
+      </Card>
     </Link>
   );
 }

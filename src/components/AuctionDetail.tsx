@@ -5,6 +5,9 @@ import { api } from '../lib/api';
 import { Auction } from '../types';
 import BidForm from './BidForm';
 import BidHistory from './BidHistory';
+import { Card, CardContent, Badge } from '@design-system/components';
+import { formatCurrency, formatTimeRemaining } from '@design-system/utils';
+import styles from './AuctionDetail.module.css';
 
 interface AuctionDetailProps {
   auctionId: string;
@@ -33,6 +36,8 @@ export default function AuctionDetail({ auctionId }: AuctionDetailProps) {
   const [auction, setAuction] = useState<AuctionWithDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState<string>('');
+  const [isEnded, setIsEnded] = useState<boolean>(false);
 
   const fetchAuction = async () => {
     try {
@@ -58,9 +63,30 @@ export default function AuctionDetail({ auctionId }: AuctionDetailProps) {
     fetchAuction();
   }, [auctionId]);
 
+  useEffect(() => {
+    if (!auction) return;
+
+    // Calculate time-based values only on client to avoid hydration mismatch
+    const endDate = new Date(auction.end_time);
+    const ended = auction.status === 'ended' || endDate < new Date();
+    setIsEnded(ended);
+    
+    if (ended) {
+      setTimeRemaining('Ended');
+    } else {
+      const updateTimeRemaining = () => {
+        setTimeRemaining(formatTimeRemaining(endDate));
+      };
+      
+      updateTimeRemaining();
+      const interval = setInterval(updateTimeRemaining, 60000); // Update every minute
+      return () => clearInterval(interval);
+    }
+  }, [auction]);
+
   if (loading) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
+      <div className={styles.loading}>
         <p>Loading auction details...</p>
       </div>
     );
@@ -68,7 +94,7 @@ export default function AuctionDetail({ auctionId }: AuctionDetailProps) {
 
   if (error) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center', color: '#ef4444' }}>
+      <div className={styles.error}>
         <p>Error: {error}</p>
       </div>
     );
@@ -76,105 +102,67 @@ export default function AuctionDetail({ auctionId }: AuctionDetailProps) {
 
   if (!auction) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
+      <div className={styles.notFound}>
         <p>Auction not found.</p>
       </div>
     );
   }
 
-  const endDate = new Date(auction.end_time);
-  const isEnded = auction.status === 'ended' || endDate < new Date();
-  const timeRemaining = isEnded 
-    ? 'Ended' 
-    : `${Math.floor((endDate.getTime() - Date.now()) / (1000 * 60 * 60))}h remaining`;
+  const statusVariant = isEnded ? 'error' : 'success';
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem' }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ 
-          fontSize: '2rem', 
-          marginBottom: '1rem',
-          color: '#1f2937'
-        }}>
-          {auction.title}
-        </h1>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h1 className={styles.title}>{auction.title}</h1>
         
-        <div style={{ 
-          display: 'flex', 
-          gap: '2rem',
-          marginBottom: '1.5rem',
-          paddingBottom: '1.5rem',
-          borderBottom: '1px solid #e5e7eb'
-        }}>
-          <div>
-            <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>
-              Current Bid
-            </div>
-            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#3b82f6' }}>
-              ${auction.current_bid.toFixed(2)}
+        <div className={styles.stats}>
+          <div className={styles.statItem}>
+            <div className={styles.statLabel}>Current Bid</div>
+            <div className={styles.currentBid}>
+              {formatCurrency(auction.current_bid || auction.starting_price)}
             </div>
           </div>
-          <div>
-            <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>
-              Starting Price
-            </div>
-            <div style={{ fontSize: '1.25rem', color: '#6b7280' }}>
-              ${auction.starting_price.toFixed(2)}
+          <div className={styles.statItem}>
+            <div className={styles.statLabel}>Starting Price</div>
+            <div className={styles.statValue}>
+              {formatCurrency(auction.starting_price)}
             </div>
           </div>
-          <div>
-            <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>
-              Status
-            </div>
-            <div style={{ 
-              fontSize: '1.25rem', 
-              fontWeight: 'bold',
-              color: isEnded ? '#ef4444' : '#10b981'
-            }}>
-              {auction.status.toUpperCase()}
-            </div>
+          <div className={styles.statItem}>
+            <div className={styles.statLabel}>Status</div>
+            <Badge variant={statusVariant} size="md">
+              {auction.status}
+            </Badge>
           </div>
-          <div>
-            <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>
-              Time Remaining
-            </div>
-            <div style={{ fontSize: '1.25rem', color: '#6b7280' }}>
-              {timeRemaining}
-            </div>
+          <div className={styles.statItem}>
+            <div className={styles.statLabel}>Time Remaining</div>
+            <div className={styles.statValue}>{timeRemaining}</div>
           </div>
         </div>
 
-        <div style={{ marginBottom: '1.5rem' }}>
-          <h2 style={{ fontSize: '1.5rem', marginBottom: '0.75rem' }}>Description</h2>
-          <div 
-            style={{ 
-              padding: '1rem',
-              backgroundColor: '#f9fafb',
-              borderRadius: '0.5rem',
-              lineHeight: '1.6',
-              color: '#374151'
-            }}
-            // XSS vulnerability: using dangerouslySetInnerHTML without sanitization
-            dangerouslySetInnerHTML={{ __html: auction.description }}
-          />
-        </div>
+        <Card variant="outlined" padding="md" className={styles.descriptionCard}>
+          <h2 className={styles.sectionTitle}>Description</h2>
+          <CardContent>
+            <div
+              className={styles.description}
+              // XSS vulnerability: using dangerouslySetInnerHTML without sanitization
+              dangerouslySetInnerHTML={{ __html: auction.description }}
+            />
+          </CardContent>
+        </Card>
 
         {auction.creator && (
-          <div style={{ 
-            fontSize: '0.875rem', 
-            color: '#6b7280',
-            marginBottom: '1.5rem'
-          }}>
+          <div className={styles.creator}>
             Created by: {auction.creator.name || auction.creator.email}
           </div>
         )}
       </div>
 
       {auction.status === 'active' && !isEnded && (
-        <div style={{ marginBottom: '2rem' }}>
+        <div className={styles.bidForm}>
           <BidForm 
             auctionId={auctionId} 
-            currentBid={auction.current_bid}
+            currentBid={Number(auction.current_bid || 0)}
             onBidPlaced={fetchAuction}
           />
         </div>

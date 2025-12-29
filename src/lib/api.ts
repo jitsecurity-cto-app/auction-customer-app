@@ -152,9 +152,19 @@ export const api = {
   },
 
   // Auction endpoints
-  async getAuctions(params?: { status?: string; limit?: number; offset?: number }) {
+  async getAuctions(params?: { 
+    status?: string; 
+    search?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    limit?: number; 
+    offset?: number 
+  }) {
     const queryParams = new URLSearchParams();
     if (params?.status) queryParams.append('status', params.status);
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.minPrice) queryParams.append('minPrice', params.minPrice.toString());
+    if (params?.maxPrice) queryParams.append('maxPrice', params.maxPrice.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.offset) queryParams.append('offset', params.offset.toString());
     
@@ -173,9 +183,10 @@ export const api = {
     starting_price: number;
     end_time: string;
   }) {
-    return apiRequest<ApiResponse<any>>('/auctions', {
+    return apiRequest<any>('/auctions', {
       method: 'POST',
       body: JSON.stringify(data),
+      requireAuth: true,
     });
   },
 
