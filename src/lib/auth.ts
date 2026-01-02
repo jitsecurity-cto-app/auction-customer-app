@@ -17,7 +17,8 @@ export function setAuth(token: string, user: User): void {
     return;
   }
 
-  localStorage.setItem(TOKEN_KEY, token);
+  // Trim token to prevent "jwt malformed" errors
+  localStorage.setItem(TOKEN_KEY, token.trim());
   localStorage.setItem(USER_KEY, JSON.stringify(user));
 }
 
@@ -28,7 +29,9 @@ export function getAuthToken(): string | null {
   if (typeof window === 'undefined') {
     return null;
   }
-  return localStorage.getItem(TOKEN_KEY);
+  const token = localStorage.getItem(TOKEN_KEY);
+  // Trim whitespace to prevent "jwt malformed" errors
+  return token ? token.trim() : null;
 }
 
 /**

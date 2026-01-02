@@ -3,9 +3,11 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import UserProfile from '@/components/UserProfile';
 import { api } from '@/lib/api';
+import { getAuthUser } from '@/lib/auth';
 
 // Mock API
 jest.mock('@/lib/api');
+jest.mock('@/lib/auth');
 
 const mockApi = api as jest.Mocked<typeof api>;
 
@@ -43,6 +45,7 @@ describe('UserProfile', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (getAuthUser as jest.Mock).mockReturnValue({ id: '1', email: 'test@example.com', name: 'Test User', role: 'user' });
   });
 
   it('should display user information', async () => {
@@ -233,6 +236,115 @@ describe('UserProfile', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/Update failed/i)).toBeInTheDocument();
+    });
+  });
+
+  it('should display active disputes when viewing own profile', async () => {
+    mockApi.getUserById.mockResolvedValue(mockUser);
+    const mockDisputes = [
+      {
+        id: '1',
+        auction_id: '1',
+        order_id: '1',
+        filed_by: '1',
+        filed_by_role: 'buyer' as const,
+        reason: 'Item not as described',
+        status: 'open' as const,
+        created_at: '2024-01-10T00:00:00Z',
+        updated_at: '2024-01-10T00:00:00Z',
+        auction: {
+          id: '1',
+          title: 'Test Auction',
+          description: 'Test Description',
+          starting_price: 50,
+          current_bid: 100,
+          end_time: '2024-12-31T23:59:59Z',
+          status: 'active' as const,
+          created_by: '1',
+          created_at: '2024-01-01T00:00:00Z',
+        },
+      },
+    ];
+    mockApi.getDisputes.mockResolvedValue(mockDisputes);
+
+    render(<UserProfile userId="1" />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Active Disputes')).toBeInTheDocument();
+      expect(screen.getByText('Item not as described')).toBeInTheDocument();
+      expect(screen.getByText('open')).toBeInTheDocument();
+    });
+  });
+
+  it('should not display disputes when viewing another user profile', async () => {
+    (getAuthUser as jest.Mock).mockReturnValue({ id: '2', email: 'other@example.com', name: 'Other User', role: 'user' });
+    mockApi.getUserById.mockResolvedValue(mockUser);
+
+    render(<UserProfile userId="1" />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Test User')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByText('Active Disputes')).not.toBeInTheDocument();
+    expect(mockApi.getDisputes).not.toHaveBeenCalled();
+  });
+
+  it('should display empty state when no active disputes', async () => {
+    mockApi.getUserById.mockResolvedValue(mockUser);
+    mockApi.getDisputes.mockResolvedValue([]);
+
+    render(<UserProfile userId="1" />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Active Disputes')).toBeInTheDocument();
+      expect(screen.getByText('No active disputes.')).toBeInTheDocument();
+    });
+  });
+
+  it('should filter to show only active disputes (open or in_review)', async () => {
+    mockApi.getUserById.mockResolvedValue(mockUser);
+    const mockDisputes = [
+      {
+        id: '1',
+        auction_id: '1',
+        filed_by: '1',
+        filed_by_role: 'buyer' as const,
+        reason: 'Active dispute',
+        status: 'open' as const,
+        created_at: '2024-01-10T00:00:00Z',
+        updated_at: '2024-01-10T00:00:00Z',
+      },
+      {
+        id: '2',
+        auction_id: '2',
+        filed_by: '1',
+        filed_by_role: 'seller' as const,
+        reason: 'In review dispute',
+        status: 'in_review' as const,
+        created_at: '2024-01-11T00:00:00Z',
+        updated_at: '2024-01-11T00:00:00Z',
+      },
+      {
+        id: '3',
+        auction_id: '3',
+        filed_by: '1',
+        filed_by_role: 'buyer' as const,
+        reason: 'Resolved dispute',
+        status: 'resolved' as const,
+        created_at: '2024-01-09T00:00:00Z',
+        updated_at: '2024-01-12T00:00:00Z',
+      },
+    ];
+    mockApi.getDisputes.mockResolvedValue(mockDisputes);
+
+    render(<UserProfile userId="1" />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Active Disputes')).toBeInTheDocument();
+      expect(screen.getByText('Active dispute')).toBeInTheDocument();
+      expect(screen.getByText('In review dispute')).toBeInTheDocument();
+      expect(screen.queryByText('Resolved dispute')).not.toBeInTheDocument();
     });
   });
 });

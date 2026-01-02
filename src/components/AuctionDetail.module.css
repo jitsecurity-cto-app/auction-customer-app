@@ -61,6 +61,38 @@
   flex-wrap: wrap;
 }
 
+/* Dispute Notice Card */
+.disputeNoticeCard {
+  margin-bottom: var(--spacing-6);
+  border-color: var(--color-warning);
+  background-color: rgba(251, 191, 36, 0.1);
+}
+
+.disputeNotice {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.disputeNoticeText {
+  color: var(--text-primary);
+  margin: 0;
+  font-size: var(--font-size-base);
+}
+
+.disputeReason {
+  color: var(--text-secondary);
+  margin: var(--spacing-2) 0 0 0;
+  font-size: var(--font-size-sm);
+  padding: var(--spacing-2);
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.disputeActions {
+  margin-top: var(--spacing-3);
+}
+
 /* Stats Card */
 .statsCard {
   margin-bottom: var(--spacing-6);

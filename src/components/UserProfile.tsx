@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
-import { User, Bid, Auction } from '../types';
+import { User, Bid, Auction, Dispute } from '../types';
+import { getAuthUser } from '../lib/auth';
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardContent, Button, Input, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Badge } from '@design-system/components';
 import { formatCurrency, formatDate, formatDateTime } from '@design-system/utils';
@@ -30,6 +31,8 @@ export default function UserProfile({ userId }: UserProfileProps) {
   });
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [disputes, setDisputes] = useState<Dispute[]>([]);
+  const [disputesLoading, setDisputesLoading] = useState(false);
 
   const fetchUser = async () => {
     try {
@@ -59,6 +62,35 @@ export default function UserProfile({ userId }: UserProfileProps) {
 
   useEffect(() => {
     fetchUser();
+  }, [userId]);
+
+  const fetchDisputes = async () => {
+    const currentUser = getAuthUser();
+    if (!currentUser || currentUser.id !== userId) {
+      // Only fetch disputes for the current user
+      return;
+    }
+
+    try {
+      setDisputesLoading(true);
+      // Fetch all disputes, then filter for those filed by the current user
+      // No authorization check - intentional vulnerability (can see all disputes)
+      const allDisputes = await api.getDisputes();
+      // Filter for disputes filed by this user
+      const userDisputes = allDisputes.filter(d => d.filed_by === userId);
+      // Only show active disputes (open or in_review)
+      const activeDisputes = userDisputes.filter(d => d.status === 'open' || d.status === 'in_review');
+      setDisputes(activeDisputes);
+    } catch (err) {
+      console.error('Failed to fetch disputes:', err);
+      // Silently fail - disputes are optional
+    } finally {
+      setDisputesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDisputes();
   }, [userId]);
 
   const handleEdit = () => {
@@ -325,6 +357,76 @@ export default function UserProfile({ userId }: UserProfileProps) {
               </TableBody>
             </Table>
           </Card>
+        </div>
+      )}
+
+      {/* Active Disputes */}
+      {getAuthUser()?.id === userId && (
+        <div className={styles.section}>
+          <h2 className={styles.sectionTitle}>Active Disputes</h2>
+          {disputesLoading ? (
+            <Card variant="outlined" padding="md">
+              <p className={styles.emptyText}>Loading disputes...</p>
+            </Card>
+          ) : disputes.length > 0 ? (
+            <Card variant="elevated" padding="none">
+              <Table striped>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Auction</TableHead>
+                    <TableHead>Reason</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead style={{ textAlign: 'right' }}>Filed</TableHead>
+                    <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {disputes.map((dispute) => (
+                    <TableRow key={dispute.id}>
+                      <TableCell>
+                        {dispute.auction ? (
+                          <Link href={`/auctions/${dispute.auction_id}`} className={styles.auctionLink}>
+                            {dispute.auction.title || `Auction #${dispute.auction_id}`}
+                          </Link>
+                        ) : (
+                          <Link href={`/auctions/${dispute.auction_id}`} className={styles.auctionLink}>
+                            Auction #{dispute.auction_id}
+                          </Link>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div style={{ maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {dispute.reason}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant={dispute.status === 'open' ? 'warning' : dispute.status === 'in_review' ? 'info' : 'default'} 
+                          size="sm"
+                        >
+                          {dispute.status.replace('_', ' ')}
+                        </Badge>
+                      </TableCell>
+                      <TableCell style={{ textAlign: 'right' }}>
+                        {formatDate(dispute.created_at)}
+                      </TableCell>
+                      <TableCell style={{ textAlign: 'right' }}>
+                        <Link href={`/auctions/${dispute.auction_id}`}>
+                          <Button variant="secondary" size="sm">
+                            View Auction
+                          </Button>
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          ) : (
+            <Card variant="outlined" padding="md" className={styles.emptyCard}>
+              <p className={styles.emptyText}>No active disputes.</p>
+            </Card>
+          )}
         </div>
       )}
     </div>

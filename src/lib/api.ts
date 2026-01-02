@@ -10,7 +10,9 @@ function getAuthToken(): string | null {
   if (typeof window === 'undefined') {
     return null;
   }
-  return localStorage.getItem('auth_token');
+  const token = localStorage.getItem('auth_token');
+  // Trim whitespace to prevent "jwt malformed" errors
+  return token ? token.trim() : null;
 }
 
 // Set auth token in localStorage (intentionally insecure)
@@ -44,9 +46,12 @@ export async function apiRequest<T>(
 
   // Add auth token if available or if requireAuth is true (no validation)
   if (token || options.requireAuth) {
-    const authToken = token || getAuthToken();
+    const authToken = (token || getAuthToken())?.trim();
     if (authToken) {
       headers['Authorization'] = `Bearer ${authToken}`;
+    } else if (options.requireAuth) {
+      // If requireAuth is true but no token, throw a clear error
+      throw new Error('Authentication required. Please log in.');
     }
   }
 
@@ -104,6 +109,13 @@ export async function apiRequest<T>(
         error: errorData,
         endpoint,
       });
+
+      // If token is malformed, clear it and ask user to log in again
+      if (errorData.message?.toLowerCase().includes('jwt malformed') || 
+          errorData.message?.toLowerCase().includes('invalid token')) {
+        removeAuthToken();
+        throw new Error('Your session has expired. Please log in again.');
+      }
 
       throw new Error(errorData.message || errorData.error || 'API request failed');
     }
@@ -367,7 +379,7 @@ export const api = {
     auction_id?: string;
     order_id?: string;
     status?: string;
-  }) {
+  }): Promise<import('../types').Dispute[]> {
     const queryParams = new URLSearchParams();
     if (params?.auction_id) queryParams.append('auction_id', params.auction_id);
     if (params?.order_id) queryParams.append('order_id', params.order_id);
@@ -375,7 +387,7 @@ export const api = {
     
     const queryString = queryParams.toString();
     const endpoint = queryString ? `/disputes?${queryString}` : '/disputes';
-    return apiRequest<any[]>(endpoint);
+    return apiRequest<import('../types').Dispute[]>(endpoint);
   },
 };
 

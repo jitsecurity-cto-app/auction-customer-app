@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { api } from '../lib/api';
-import { Auction } from '../types';
+import { Auction, Dispute } from '../types';
 import { getAuthUser } from '../lib/auth';
 import { Card, CardHeader, CardTitle, CardContent, Badge, Button } from '@design-system/components';
 import { formatCurrency, formatTimeRemaining } from '@design-system/utils';
@@ -47,6 +47,7 @@ export default function AuctionDetail({ auctionId }: AuctionDetailProps) {
   const [timeRemaining, setTimeRemaining] = useState<string>('');
   const [isEnded, setIsEnded] = useState<boolean>(false);
   const [mounted, setMounted] = useState<boolean>(false);
+  const [disputes, setDisputes] = useState<Dispute[]>([]);
 
   const fetchAuction = async () => {
     try {
@@ -72,6 +73,26 @@ export default function AuctionDetail({ auctionId }: AuctionDetailProps) {
 
   useEffect(() => {
     fetchAuction();
+  }, [auctionId]);
+
+  const fetchDisputes = async () => {
+    try {
+      // Fetch disputes for this auction
+      // No authorization check - intentional vulnerability (can see all disputes)
+      const auctionDisputes = await api.getDisputes({ auction_id: auctionId });
+      // Only show active disputes (open or in_review)
+      const activeDisputes = auctionDisputes.filter(d => d.status === 'open' || d.status === 'in_review');
+      setDisputes(activeDisputes);
+    } catch (err) {
+      console.error('Failed to fetch disputes:', err);
+      // Silently fail - disputes are optional
+    }
+  };
+
+  useEffect(() => {
+    if (auctionId) {
+      fetchDisputes();
+    }
   }, [auctionId]);
 
   useEffect(() => {
@@ -171,6 +192,37 @@ export default function AuctionDetail({ auctionId }: AuctionDetailProps) {
               )}
             </div>
           </div>
+
+          {/* Dispute Notice */}
+          {disputes.length > 0 && (
+            <Card variant="outlined" padding="md" className={styles.disputeNoticeCard}>
+              <CardContent>
+                <div className={styles.disputeNotice}>
+                  <Badge variant="warning" size="md" style={{ marginBottom: 'var(--spacing-2)' }}>
+                    Dispute Pending
+                  </Badge>
+                  <p className={styles.disputeNoticeText}>
+                    {disputes.length === 1 
+                      ? 'A dispute has been opened for this auction and is currently pending review.'
+                      : `${disputes.length} disputes have been opened for this auction and are currently pending review.`
+                    }
+                  </p>
+                  {disputes.length === 1 && disputes[0].reason && (
+                    <p className={styles.disputeReason}>
+                      <strong>Reason:</strong> {disputes[0].reason}
+                    </p>
+                  )}
+                  <div className={styles.disputeActions}>
+                    <Link href={`/profile?id=${getAuthUser()?.id || ''}`}>
+                      <Button variant="secondary" size="sm">
+                        View Disputes in Profile
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Key Stats */}
           <Card variant="elevated" padding="md" className={styles.statsCard}>

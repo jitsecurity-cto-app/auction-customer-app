@@ -9,12 +9,24 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // Webpack config to resolve design-system path alias
-  webpack: (config) => {
+  // Webpack config to resolve design-system path alias and fix CSS HMR
+  webpack: (config, { dev, isServer }) => {
     config.resolve.alias = {
       ...config.resolve.alias,
       '@design-system': path.resolve(__dirname, '../design-system/src'),
     };
+    
+    // Fix for CSS HMR issue in development
+    if (dev && !isServer) {
+      // Improve CSS HMR handling
+      const MiniCssExtractPlugin = config.plugins.find(
+        (plugin) => plugin.constructor.name === 'MiniCssExtractPlugin'
+      );
+      if (MiniCssExtractPlugin) {
+        MiniCssExtractPlugin.options.ignoreOrder = true;
+      }
+    }
+    
     return config;
   },
   // Intentionally permissive CORS for lab (security vulnerability)

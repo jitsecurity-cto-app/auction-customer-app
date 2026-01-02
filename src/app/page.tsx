@@ -9,9 +9,11 @@ import styles from './page.module.css';
 
 export default function HomePage() {
   const [authenticated, setAuthenticated] = useState<boolean>(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     // Check authentication only on client to avoid hydration mismatch
+    setMounted(true);
     setAuthenticated(isAuthenticated());
   }, []);
 
@@ -36,7 +38,7 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-          {authenticated && (
+          {mounted && authenticated && (
             <Link href="/auctions/new">
               <Button variant="primary" size="lg">Create Auction</Button>
             </Link>

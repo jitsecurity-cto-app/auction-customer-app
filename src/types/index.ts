@@ -70,6 +70,22 @@ export interface Order {
   seller?: User;
 }
 
+export interface Dispute {
+  id: string;
+  auction_id: string;
+  order_id?: string;
+  filed_by: string;
+  filed_by_role: 'seller' | 'buyer';
+  reason: string;
+  status: 'open' | 'in_review' | 'resolved' | 'closed';
+  resolution?: string;
+  created_at: string;
+  updated_at: string;
+  auction?: Auction;
+  order?: Order;
+  filer?: User;
+}
+
 export interface ApiError {
   error: string;
   message: string;

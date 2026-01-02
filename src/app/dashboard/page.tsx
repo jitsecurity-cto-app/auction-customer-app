@@ -211,6 +211,15 @@ function DashboardContent() {
     complete: auctions.filter(a => a.workflow_state === 'complete'),
   };
 
+  // Find auctions where buyer needs to take action (pending_sale without order)
+  const buyerActionNeeded = mounted && user
+    ? auctions.filter(a => 
+        a.workflow_state === 'pending_sale' && 
+        a.winner_id === user.id && 
+        !a.order
+      )
+    : [];
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -221,6 +230,30 @@ function DashboardContent() {
           </Link>
         </div>
       </div>
+
+      {buyerActionNeeded.length > 0 && (
+        <div style={{
+          padding: '16px',
+          marginBottom: '24px',
+          backgroundColor: '#fff3cd',
+          border: '1px solid #ffc107',
+          borderRadius: '8px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px'
+        }}>
+          <span style={{ fontSize: '20px' }}>⚠️</span>
+          <div style={{ flex: 1 }}>
+            <strong style={{ color: '#856404', display: 'block', marginBottom: '4px' }}>
+              Action Required: Complete Your Purchase
+            </strong>
+            <p style={{ margin: 0, color: '#856404', fontSize: '14px' }}>
+              You have {buyerActionNeeded.length} {buyerActionNeeded.length === 1 ? 'auction' : 'auctions'} waiting for you to complete payment and shipping details. 
+              The seller is waiting for your action.
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className={styles.filters}>
         <div className={styles.roleFilter}>
