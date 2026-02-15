@@ -36,7 +36,7 @@ jobs:
       - name: Checkout database service
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.repository_owner }}/database-service
+          repository: ${{ github.repository_owner }}/auction-database-service
           path: database-service
           # Use same branch as customer app, or fallback to main
           ref: ${{ github.head_ref || github.ref_name }}
