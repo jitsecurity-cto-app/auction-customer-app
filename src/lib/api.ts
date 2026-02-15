@@ -39,9 +39,9 @@ export async function apiRequest<T>(
   const token = getAuthToken();
   
   // Intentionally permissive headers (security vulnerability)
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...options.headers,
+    ...(options.headers as Record<string, string>),
   };
 
   // Add auth token if available or if requireAuth is true (no validation)

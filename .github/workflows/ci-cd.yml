@@ -32,7 +32,13 @@ jobs:
     steps:
       - name: Checkout customer app
         uses: actions/checkout@v4
-      
+
+      - name: Checkout design system
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/design-system
+          path: ../design-system
+
       - name: Checkout database service
         uses: actions/checkout@v4
         with:
@@ -154,6 +160,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Checkout design system
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/design-system
+          path: ../design-system
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

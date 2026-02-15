@@ -30,6 +30,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Checkout design system
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/design-system
+          path: ../design-system
+
       - name: Validate required secrets
         run: |
           if [ -z "${{ secrets.NEXT_PUBLIC_API_URL }}" ] && [ -z "${{ secrets.API_URL }}" ]; then
