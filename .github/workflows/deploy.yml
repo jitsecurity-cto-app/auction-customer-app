@@ -22,6 +22,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment || 'dev' }}
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - name: Checkout code
@@ -29,14 +32,6 @@ jobs:
 
       - name: Validate required secrets
         run: |
-          if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ]; then
-            echo "❌ Error: AWS_ACCESS_KEY_ID secret is missing"
-            exit 1
-          fi
-          if [ -z "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ]; then
-            echo "❌ Error: AWS_SECRET_ACCESS_KEY secret is missing"
-            exit 1
-          fi
           if [ -z "${{ secrets.NEXT_PUBLIC_API_URL }}" ] && [ -z "${{ secrets.API_URL }}" ]; then
             echo "⚠️  Warning: NEXT_PUBLIC_API_URL or API_URL secret is missing"
             echo "   Build will continue but API calls may fail"
@@ -69,8 +64,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: arn:aws:iam::497919588760:role/deployer_oidc
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Terraform Init
