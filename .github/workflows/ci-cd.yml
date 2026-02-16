@@ -195,6 +195,7 @@ jobs:
         env:
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
           NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
+          SKIP_STATIC_EXPORT: 'true'
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
