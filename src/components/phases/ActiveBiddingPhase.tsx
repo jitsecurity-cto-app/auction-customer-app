@@ -3,11 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
-import { Card, CardHeader, CardTitle, CardContent, Button, Badge } from '@design-system/components';
 import { formatCurrency } from '@design-system/utils';
 import BidForm from '../BidForm';
 import BidHistory from '../BidHistory';
-import styles from './PhaseComponents.module.css';
 
 interface ActiveBiddingPhaseProps {
   auction: any;
@@ -38,68 +36,59 @@ export default function ActiveBiddingPhase({ auction, isSeller, isBuyer, onUpdat
 
   if (isSeller) {
     return (
-      <div className={styles.phaseContainer}>
-        <Card variant="outlined" padding="md" className={styles.sellerCard}>
-          <CardHeader>
-            <CardTitle>Seller View - Active Bidding</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={styles.stats}>
-              <div className={styles.stat}>
-                <span className={styles.statLabel}>Current Highest Bid:</span>
-                <span className={styles.statValue}>{formatCurrency(auction.current_bid || auction.starting_price)}</span>
-              </div>
-              <div className={styles.stat}>
-                <span className={styles.statLabel}>Starting Price:</span>
-                <span className={styles.statValue}>{formatCurrency(auction.starting_price)}</span>
-              </div>
-            </div>
+      <div className="space-y-6">
+        <div className="bg-white rounded-xl border-l-4 border-l-primary-500 border border-slate-200 shadow-sm p-6">
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">Seller View - Active Bidding</h3>
 
-            <div className={styles.actions}>
-              <Button
-                variant="danger"
-                onClick={handleCloseAuction}
-                disabled={closingAuction}
-                isLoading={closingAuction}
-              >
-                {closingAuction ? 'Closing...' : 'Stop Sale / Close Auction'}
-              </Button>
+          <div className="space-y-3 mb-6">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-slate-500">Current Highest Bid:</span>
+              <span className="text-lg font-bold text-primary-600">{formatCurrency(auction.current_bid || auction.starting_price)}</span>
             </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-slate-500">Starting Price:</span>
+              <span className="text-sm font-medium text-slate-700">{formatCurrency(auction.starting_price)}</span>
+            </div>
+          </div>
 
-            <div className={styles.section}>
-              <h3 className={styles.sectionTitle}>All Bids</h3>
-              <BidHistory auctionId={auction.id} />
-            </div>
-          </CardContent>
-        </Card>
+          <button
+            onClick={handleCloseAuction}
+            disabled={closingAuction}
+            className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg px-4 py-2.5 text-sm transition-colors"
+          >
+            {closingAuction ? 'Closing...' : 'Stop Sale / Close Auction'}
+          </button>
+
+          <div className="mt-6 pt-6 border-t border-slate-200">
+            <h4 className="text-sm font-semibold text-slate-900 mb-3">All Bids</h4>
+            <BidHistory auctionId={auction.id} />
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className={styles.phaseContainer}>
-      <Card variant="outlined" padding="md" className={styles.buyerCard}>
-        <CardHeader>
-          <CardTitle>Place Your Bid</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className={styles.bidInfo}>
-            <p className={styles.currentBidText}>
-              Current Bid: <strong>{formatCurrency(auction.current_bid || auction.starting_price)}</strong>
-            </p>
-            <p className={styles.startingPriceText}>
-              Starting Price: {formatCurrency(auction.starting_price)}
-            </p>
-          </div>
-          <BidForm 
-            auctionId={auction.id} 
-            currentBid={Number(auction.current_bid || auction.starting_price)}
-            onBidPlaced={onUpdate}
-          />
-        </CardContent>
-      </Card>
+    <div className="space-y-6">
+      <div className="bg-white rounded-xl border-l-4 border-l-primary-500 border border-slate-200 shadow-sm p-6">
+        <h3 className="text-lg font-semibold text-slate-900 mb-4">Place Your Bid</h3>
+        <div className="space-y-2 mb-4">
+          <p className="text-sm text-slate-600">
+            Current Bid: <strong className="text-primary-600">{formatCurrency(auction.current_bid || auction.starting_price)}</strong>
+          </p>
+          <p className="text-xs text-slate-500">
+            Starting Price: {formatCurrency(auction.starting_price)}
+          </p>
+        </div>
+        <BidForm
+          auctionId={auction.id}
+          currentBid={Number(auction.current_bid || auction.starting_price)}
+          onBidPlaced={onUpdate}
+        />
+      </div>
 
-      <div className={styles.section}>
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+        <h4 className="text-sm font-semibold text-slate-900 mb-3">Bid History</h4>
         <BidHistory auctionId={auction.id} />
       </div>
     </div>

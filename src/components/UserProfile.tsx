@@ -5,9 +5,7 @@ import { api } from '../lib/api';
 import { User, Bid, Auction, Dispute } from '../types';
 import { getAuthUser } from '../lib/auth';
 import Link from 'next/link';
-import { Card, CardHeader, CardTitle, CardContent, Button, Input, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Badge } from '@design-system/components';
 import { formatCurrency, formatDate, formatDateTime } from '@design-system/utils';
-import styles from './UserProfile.module.css';
 
 interface UserProfileProps {
   userId: string;
@@ -38,7 +36,7 @@ export default function UserProfile({ userId }: UserProfileProps) {
     try {
       setLoading(true);
       setError(null);
-      
+
       // No authorization check - IDOR vulnerability (can access any user by ID)
       // No validation of userId (intentional vulnerability)
       const data = await api.getUserById(userId);
@@ -50,8 +48,8 @@ export default function UserProfile({ userId }: UserProfileProps) {
       });
     } catch (err) {
       // Intentionally verbose error messages (security vulnerability)
-      const errorMessage = err instanceof Error 
-        ? err.message 
+      const errorMessage = err instanceof Error
+        ? err.message
         : 'Failed to load user profile';
       setError(errorMessage);
       console.error('Failed to fetch user:', err);
@@ -134,14 +132,14 @@ export default function UserProfile({ userId }: UserProfileProps) {
       console.log('Updating user:', { userId, updateData });
 
       const updatedUser = await api.updateUser(userId, updateData);
-      
+
       setUser(updatedUser);
       setEditing(false);
       setEditForm({ ...editForm, password: '' });
     } catch (err) {
       // Intentionally verbose error messages (security vulnerability)
-      const errorMessage = err instanceof Error 
-        ? err.message 
+      const errorMessage = err instanceof Error
+        ? err.message
         : 'Failed to update profile';
       setSaveError(errorMessage);
       console.error('Failed to update user:', err);
@@ -152,284 +150,304 @@ export default function UserProfile({ userId }: UserProfileProps) {
 
   if (loading) {
     return (
-      <div className={styles.loading}>
-        <p>Loading profile...</p>
+      <div className="flex flex-col items-center justify-center py-24">
+        <svg className="animate-spin h-8 w-8 text-primary-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p className="text-sm text-slate-500">Loading profile...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className={styles.error}>
-        <p>Error: {error}</p>
+      <div className="flex flex-col items-center justify-center py-24">
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 text-sm">
+          Error: {error}
+        </div>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className={styles.notFound}>
-        <p>User not found.</p>
+      <div className="flex flex-col items-center justify-center py-24">
+        <p className="text-sm text-slate-500">User not found.</p>
       </div>
     );
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.profileSection}>
-        <h1 className={styles.pageTitle}>User Profile</h1>
+    <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      {/* Profile Section */}
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900 mb-6">User Profile</h1>
 
         {!editing ? (
-          <Card variant="elevated" padding="md">
-            <CardContent>
-              <div className={styles.profileInfo}>
-                <div className={styles.infoItem}>
-                  <div className={styles.infoLabel}>Name</div>
-                  <div className={styles.infoValue}>{user.name}</div>
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 pb-4 border-b border-slate-100">
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-100 text-primary-700 font-bold text-xl">
+                  {(user.name || user.email || '?').charAt(0).toUpperCase()}
                 </div>
-                <div className={styles.infoItem}>
-                  <div className={styles.infoLabel}>Email</div>
-                  <div className={styles.infoValueSecondary}>{user.email}</div>
+                <div>
+                  <div className="text-lg font-semibold text-slate-900">{user.name}</div>
+                  <div className="text-sm text-slate-500">{user.email}</div>
                 </div>
-                <div className={styles.infoItem}>
-                  <div className={styles.infoLabel}>Role</div>
-                  <div className={styles.infoValueSecondary} style={{ textTransform: 'capitalize' }}>
-                    {user.role}
-                  </div>
-                </div>
-                <div className={styles.infoItem}>
-                  <div className={styles.infoLabel}>Member Since</div>
-                  <div className={styles.infoValueSecondary}>
-                    {formatDate(user.created_at)}
-                  </div>
-                </div>
-                
-                {/* Intentionally display password hash (security vulnerability) */}
-                {user.password_hash && (
-                  <Card variant="outlined" padding="sm" className={styles.warningCard}>
-                    <div className={styles.warningLabel}>
-                      Password Hash (intentionally exposed for lab):
-                    </div>
-                    <code className={styles.hashCode}>
-                      {user.password_hash}
-                    </code>
-                  </Card>
-                )}
-
-                <Button variant="primary" onClick={handleEdit}>
-                  Edit Profile
-                </Button>
               </div>
-            </CardContent>
-          </Card>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <div className="text-xs text-slate-500 mb-0.5">Role</div>
+                  <div className="text-sm font-medium text-slate-700 capitalize">{user.role}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-slate-500 mb-0.5">Member Since</div>
+                  <div className="text-sm font-medium text-slate-700">{formatDate(user.created_at)}</div>
+                </div>
+              </div>
+
+              {/* Intentionally display password hash (security vulnerability) */}
+              {user.password_hash && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mt-4">
+                  <div className="text-xs font-medium text-amber-700 mb-1">
+                    Password Hash (intentionally exposed for lab):
+                  </div>
+                  <code className="text-xs text-amber-800 break-all">
+                    {user.password_hash}
+                  </code>
+                </div>
+              )}
+
+              <button
+                onClick={handleEdit}
+                className="mt-4 bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+              >
+                Edit Profile
+              </button>
+            </div>
+          </div>
         ) : (
-          <Card variant="elevated" padding="md">
-            <CardContent>
-              <div className={styles.editForm}>
-                <Input
-                  label="Name"
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+            <div className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Name</label>
+                <input
                   type="text"
                   value={editForm.name}
                   onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                  fullWidth
+                  className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                   // No input validation (intentional vulnerability)
                 />
-                <Input
-                  label="Email"
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
+                <input
                   type="text"
                   value={editForm.email}
                   onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                  fullWidth
+                  className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                   // No email validation (intentional vulnerability)
                 />
-                <Input
-                  label="New Password (leave blank to keep current)"
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">New Password (leave blank to keep current)</label>
+                <input
                   type="password"
                   value={editForm.password}
                   onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
-                  fullWidth
+                  className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                   // No password strength validation (intentional vulnerability)
                 />
-
-                {saveError && (
-                  <div className={styles.errorMessage} role="alert">
-                    {saveError}
-                  </div>
-                )}
-
-                <div className={styles.formActions}>
-                  <Button
-                    variant="primary"
-                    onClick={handleSave}
-                    isLoading={saveLoading}
-                    disabled={saveLoading}
-                  >
-                    {saveLoading ? 'Saving...' : 'Save Changes'}
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={handleCancel}
-                    disabled={saveLoading}
-                  >
-                    Cancel
-                  </Button>
-                </div>
               </div>
-            </CardContent>
-          </Card>
+
+              {saveError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm" role="alert">
+                  {saveError}
+                </div>
+              )}
+
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleSave}
+                  disabled={saveLoading}
+                  className="bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+                >
+                  {saveLoading ? 'Saving...' : 'Save Changes'}
+                </button>
+                <button
+                  onClick={handleCancel}
+                  disabled={saveLoading}
+                  className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 disabled:opacity-50 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
 
       {/* Bidding History */}
-      <div className={styles.section}>
-        <h2 className={styles.sectionTitle}>Bidding History</h2>
+      <div>
+        <h2 className="text-lg font-semibold text-slate-900 mb-4">Bidding History</h2>
         {user.bids && user.bids.length > 0 ? (
-          <Card variant="elevated" padding="none">
-            <Table striped>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Auction</TableHead>
-                  <TableHead style={{ textAlign: 'right' }}>Bid Amount</TableHead>
-                  <TableHead style={{ textAlign: 'right' }}>Date</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {user.bids.map((bid) => (
-                  <TableRow key={bid.id}>
-                    <TableCell>
-                      <Link href={`/auctions/${bid.auction_id}`} className={styles.auctionLink}>
-                        Auction #{bid.auction_id}
-                      </Link>
-                    </TableCell>
-                    <TableCell style={{ textAlign: 'right', fontWeight: 'var(--font-weight-bold)' }}>
-                      {formatCurrency(bid.amount || 0)}
-                    </TableCell>
-                    <TableCell style={{ textAlign: 'right' }}>
-                      {formatDateTime(bid.created_at)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Card>
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-slate-50">
+                    <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">Auction</th>
+                    <th className="text-right text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">Bid Amount</th>
+                    <th className="text-right text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">Date</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200">
+                  {user.bids.map((bid) => (
+                    <tr key={bid.id} className="hover:bg-slate-50">
+                      <td className="px-4 py-3">
+                        <Link href={`/auctions/${bid.auction_id}`} className="text-sm font-medium text-primary-600 hover:text-primary-700">
+                          Auction #{bid.auction_id}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <span className="text-sm font-bold text-slate-900">{formatCurrency(bid.amount || 0)}</span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <span className="text-xs text-slate-500">{formatDateTime(bid.created_at)}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         ) : (
-          <Card variant="outlined" padding="md" className={styles.emptyCard}>
-            <p className={styles.emptyText}>No bids yet. Start bidding on auctions!</p>
-          </Card>
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 text-center">
+            <p className="text-sm text-slate-500">No bids yet. Start bidding on auctions!</p>
+          </div>
         )}
       </div>
 
       {/* Created Auctions */}
       {user.auctions && user.auctions.length > 0 && (
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>Created Auctions</h2>
-          <Card variant="elevated" padding="none">
-            <Table striped>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead style={{ textAlign: 'right' }}>Current Bid</TableHead>
-                  <TableHead style={{ textAlign: 'right' }}>Status</TableHead>
-                  <TableHead style={{ textAlign: 'right' }}>Created</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {user.auctions.map((auction) => (
-                  <TableRow key={auction.id}>
-                    <TableCell>
-                      <Link href={`/auctions/${auction.id}`} className={styles.auctionLink}>
-                        {auction.title}
-                      </Link>
-                    </TableCell>
-                    <TableCell style={{ textAlign: 'right', fontWeight: 'var(--font-weight-bold)' }}>
-                      {formatCurrency(auction.current_bid || 0)}
-                    </TableCell>
-                    <TableCell style={{ textAlign: 'right' }}>
-                      <Badge variant={auction.status === 'active' ? 'success' : 'default'} size="sm">
-                        {auction.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell style={{ textAlign: 'right' }}>
-                      {formatDate(auction.created_at)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Card>
+        <div>
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">Created Auctions</h2>
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-slate-50">
+                    <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">Title</th>
+                    <th className="text-right text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">Current Bid</th>
+                    <th className="text-right text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">Status</th>
+                    <th className="text-right text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">Created</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200">
+                  {user.auctions.map((auction) => (
+                    <tr key={auction.id} className="hover:bg-slate-50">
+                      <td className="px-4 py-3">
+                        <Link href={`/auctions/${auction.id}`} className="text-sm font-medium text-primary-600 hover:text-primary-700">
+                          {auction.title}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <span className="text-sm font-bold text-slate-900">{formatCurrency(auction.current_bid || 0)}</span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <span className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${auction.status === 'active' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-600 border border-slate-200'}`}>
+                          {auction.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <span className="text-xs text-slate-500">{formatDate(auction.created_at)}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Active Disputes */}
       {getAuthUser()?.id === userId && (
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>Active Disputes</h2>
+        <div>
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">Active Disputes</h2>
           {disputesLoading ? (
-            <Card variant="outlined" padding="md">
-              <p className={styles.emptyText}>Loading disputes...</p>
-            </Card>
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 text-center">
+              <p className="text-sm text-slate-500">Loading disputes...</p>
+            </div>
           ) : disputes.length > 0 ? (
-            <Card variant="elevated" padding="none">
-              <Table striped>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Auction</TableHead>
-                    <TableHead>Reason</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead style={{ textAlign: 'right' }}>Filed</TableHead>
-                    <TableHead style={{ textAlign: 'right' }}>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {disputes.map((dispute) => (
-                    <TableRow key={dispute.id}>
-                      <TableCell>
-                        {dispute.auction ? (
-                          <Link href={`/auctions/${dispute.auction_id}`} className={styles.auctionLink}>
-                            {dispute.auction.title || `Auction #${dispute.auction_id}`}
-                          </Link>
-                        ) : (
-                          <Link href={`/auctions/${dispute.auction_id}`} className={styles.auctionLink}>
-                            Auction #{dispute.auction_id}
-                          </Link>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div style={{ maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {dispute.reason}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge 
-                          variant={dispute.status === 'open' ? 'warning' : dispute.status === 'in_review' ? 'info' : 'default'} 
-                          size="sm"
-                        >
-                          {dispute.status.replace('_', ' ')}
-                        </Badge>
-                      </TableCell>
-                      <TableCell style={{ textAlign: 'right' }}>
-                        {formatDate(dispute.created_at)}
-                      </TableCell>
-                      <TableCell style={{ textAlign: 'right' }}>
-                        <Link href={`/auctions/${dispute.auction_id}`}>
-                          <Button variant="secondary" size="sm">
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-slate-50">
+                      <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">Auction</th>
+                      <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">Reason</th>
+                      <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">Status</th>
+                      <th className="text-right text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">Filed</th>
+                      <th className="text-right text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200">
+                    {disputes.map((dispute) => (
+                      <tr key={dispute.id} className="hover:bg-slate-50">
+                        <td className="px-4 py-3">
+                          {dispute.auction ? (
+                            <Link href={`/auctions/${dispute.auction_id}`} className="text-sm font-medium text-primary-600 hover:text-primary-700">
+                              {dispute.auction.title || `Auction #${dispute.auction_id}`}
+                            </Link>
+                          ) : (
+                            <Link href={`/auctions/${dispute.auction_id}`} className="text-sm font-medium text-primary-600 hover:text-primary-700">
+                              Auction #{dispute.auction_id}
+                            </Link>
+                          )}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="max-w-[300px] overflow-hidden text-ellipsis whitespace-nowrap text-sm text-slate-600">
+                            {dispute.reason}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${
+                            dispute.status === 'open'
+                              ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                              : dispute.status === 'in_review'
+                              ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                              : 'bg-slate-100 text-slate-600 border border-slate-200'
+                          }`}>
+                            {dispute.status.replace('_', ' ')}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <span className="text-xs text-slate-500">{formatDate(dispute.created_at)}</span>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <Link
+                            href={`/auctions/${dispute.auction_id}`}
+                            className="inline-flex bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors"
+                          >
                             View Auction
-                          </Button>
-                        </Link>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Card>
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           ) : (
-            <Card variant="outlined" padding="md" className={styles.emptyCard}>
-              <p className={styles.emptyText}>No active disputes.</p>
-            </Card>
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 text-center">
+              <p className="text-sm text-slate-500">No active disputes.</p>
+            </div>
           )}
         </div>
       )}
     </div>
   );
 }
-

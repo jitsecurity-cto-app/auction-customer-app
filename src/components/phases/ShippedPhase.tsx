@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
-import { Card, CardHeader, CardTitle, CardContent, Button, Badge } from '@design-system/components';
 import { formatCurrency } from '@design-system/utils';
-import styles from './PhaseComponents.module.css';
 
 interface ShippedPhaseProps {
   auction: any;
@@ -38,7 +36,7 @@ export default function ShippedPhase({ auction, order, isSeller, isBuyer, onUpda
         shipping_status: 'delivered',
         status: 'completed',
       });
-      
+
       // Update workflow state
       await api.updateWorkflowState(auction.id, 'complete');
       onUpdate();
@@ -50,68 +48,61 @@ export default function ShippedPhase({ auction, order, isSeller, isBuyer, onUpda
   };
 
   return (
-    <div className={styles.phaseContainer}>
-      <Card variant="outlined" padding="md" className={styles.shippedCard}>
-        <CardHeader>
-          <CardTitle>Item Shipped</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className={styles.shippingInfo}>
-            {order?.tracking_number && (
-              <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Tracking Number:</span>
-                <strong>{order.tracking_number}</strong>
-              </div>
-            )}
-            {order?.tracking_url && (
-              <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Tracking Link:</span>
-                <a 
-                  href={order.tracking_url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className={styles.trackingLink}
-                >
-                  Track Package
-                </a>
-              </div>
-            )}
-            {order?.shipped_at && (
-              <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Shipped On:</span>
-                <span>{new Date(order.shipped_at).toLocaleDateString()}</span>
-              </div>
-            )}
+    <div className="bg-white rounded-xl border-l-4 border-l-blue-500 border border-slate-200 shadow-sm p-6">
+      <h3 className="text-lg font-semibold text-slate-900 mb-4">Item Shipped</h3>
+
+      <div className="space-y-3 mb-5">
+        {order?.tracking_number && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-slate-500">Tracking Number:</span>
+            <strong className="text-slate-900">{order.tracking_number}</strong>
           </div>
+        )}
+        {order?.tracking_url && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-slate-500">Tracking Link:</span>
+            <a
+              href={order.tracking_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary-600 hover:text-primary-700 font-medium"
+            >
+              Track Package
+            </a>
+          </div>
+        )}
+        {order?.shipped_at && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-slate-500">Shipped On:</span>
+            <span className="text-slate-700">{new Date(order.shipped_at).toLocaleDateString()}</span>
+          </div>
+        )}
+      </div>
 
-          {isBuyer && (
-            <div className={styles.buyerActions}>
-              <p className={styles.infoText}>
-                {daysUntilAutoComplete !== null && daysUntilAutoComplete > 0
-                  ? `Please confirm receipt. Order will auto-complete in ${daysUntilAutoComplete} days if not confirmed.`
-                  : 'Please confirm that you have received the item.'}
-              </p>
-              <Button
-                variant="primary"
-                onClick={handleConfirmReceipt}
-                disabled={confirming}
-                isLoading={confirming}
-                fullWidth
-              >
-                {confirming ? 'Confirming...' : 'Confirm Receipt'}
-              </Button>
-            </div>
-          )}
+      {isBuyer && (
+        <div>
+          <p className="text-sm text-slate-600 mb-4">
+            {daysUntilAutoComplete !== null && daysUntilAutoComplete > 0
+              ? `Please confirm receipt. Order will auto-complete in ${daysUntilAutoComplete} days if not confirmed.`
+              : 'Please confirm that you have received the item.'}
+          </p>
+          <button
+            onClick={handleConfirmReceipt}
+            disabled={confirming}
+            className="w-full bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg px-4 py-3 text-sm transition-colors"
+          >
+            {confirming ? 'Confirming...' : 'Confirm Receipt'}
+          </button>
+        </div>
+      )}
 
-          {isSeller && (
-            <div className={styles.sellerInfo}>
-              <p className={styles.infoText}>
-                Waiting for buyer to confirm receipt. Order will automatically complete after 30 days if not confirmed.
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {isSeller && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <p className="text-sm text-blue-800">
+            Waiting for buyer to confirm receipt. Order will automatically complete after 30 days if not confirmed.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

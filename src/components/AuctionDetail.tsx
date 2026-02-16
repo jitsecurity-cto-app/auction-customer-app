@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { api } from '../lib/api';
 import { Auction, Dispute } from '../types';
 import { getAuthUser } from '../lib/auth';
-import { Card, CardHeader, CardTitle, CardContent, Badge, Button } from '@design-system/components';
 import { formatCurrency, formatTimeRemaining } from '@design-system/utils';
 import WorkflowVisualization from './WorkflowVisualization';
 import ActiveBiddingPhase from './phases/ActiveBiddingPhase';
@@ -13,7 +12,6 @@ import PendingSalePhase from './phases/PendingSalePhase';
 import ShippedPhase from './phases/ShippedPhase';
 import CompletePhase from './phases/CompletePhase';
 import BidHistory from './BidHistory';
-import styles from './AuctionDetail.module.css';
 
 interface AuctionDetailProps {
   auctionId: string;
@@ -53,12 +51,12 @@ export default function AuctionDetail({ auctionId }: AuctionDetailProps) {
     try {
       setLoading(true);
       setError(null);
-      
+
       const data = await api.get<AuctionWithDetails>(`/auctions/${auctionId}`);
       setAuction(data);
     } catch (err) {
-      const errorMessage = err instanceof Error 
-        ? err.message 
+      const errorMessage = err instanceof Error
+        ? err.message
         : 'Failed to load auction';
       setError(errorMessage);
       console.error('Failed to fetch auction:', err);
@@ -101,14 +99,14 @@ export default function AuctionDetail({ auctionId }: AuctionDetailProps) {
     const endDate = new Date(auction.end_time);
     const ended = auction.status === 'ended' || endDate < new Date();
     setIsEnded(ended);
-    
+
     if (ended) {
       setTimeRemaining('Ended');
     } else {
       const updateTimeRemaining = () => {
         setTimeRemaining(formatTimeRemaining(endDate));
       };
-      
+
       updateTimeRemaining();
       const interval = setInterval(updateTimeRemaining, 60000);
       return () => clearInterval(interval);
@@ -117,10 +115,14 @@ export default function AuctionDetail({ auctionId }: AuctionDetailProps) {
 
   if (loading) {
     return (
-      <main className={styles.main}>
-        <div className={styles.container}>
-          <div className={styles.loading}>
-            <p>Loading auction details...</p>
+      <main className="min-h-screen bg-slate-50">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col items-center justify-center py-24">
+            <svg className="animate-spin h-10 w-10 text-primary-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p className="text-slate-500">Loading auction details...</p>
           </div>
         </div>
       </main>
@@ -129,15 +131,15 @@ export default function AuctionDetail({ auctionId }: AuctionDetailProps) {
 
   if (error) {
     return (
-      <main className={styles.main}>
-        <div className={styles.container}>
-          <Card variant="outlined" padding="md" className={styles.errorCard}>
-            <CardContent>
-              <h2 className={styles.errorTitle}>Error Loading Auction</h2>
-              <p className={styles.errorMessage}>{error}</p>
-              <Button variant="primary" onClick={fetchAuction}>Retry</Button>
-            </CardContent>
-          </Card>
+      <main className="min-h-screen bg-slate-50">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8 text-center">
+            <h2 className="text-lg font-semibold text-slate-900 mb-2">Error Loading Auction</h2>
+            <p className="text-sm text-slate-500 mb-4">{error}</p>
+            <button onClick={fetchAuction} className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors">
+              Retry
+            </button>
+          </div>
         </div>
       </main>
     );
@@ -145,17 +147,15 @@ export default function AuctionDetail({ auctionId }: AuctionDetailProps) {
 
   if (!auction) {
     return (
-      <main className={styles.main}>
-        <div className={styles.container}>
-          <Card variant="outlined" padding="md" className={styles.notFoundCard}>
-            <CardContent>
-              <h2 className={styles.notFoundTitle}>Auction Not Found</h2>
-              <p>The auction you're looking for doesn't exist or has been removed.</p>
-              <Link href="/auctions">
-                <Button variant="primary">Browse Auctions</Button>
-              </Link>
-            </CardContent>
-          </Card>
+      <main className="min-h-screen bg-slate-50">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8 text-center">
+            <h2 className="text-lg font-semibold text-slate-900 mb-2">Auction Not Found</h2>
+            <p className="text-sm text-slate-500 mb-4">The auction you&apos;re looking for doesn&apos;t exist or has been removed.</p>
+            <Link href="/auctions" className="inline-flex bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors">
+              Browse Auctions
+            </Link>
+          </div>
         </div>
       </main>
     );
@@ -166,145 +166,152 @@ export default function AuctionDetail({ auctionId }: AuctionDetailProps) {
   const isBuyer = user && auction.winner_id === user.id;
   const workflowState = auction.workflow_state || (auction.status === 'active' ? 'active' : 'pending_sale');
 
+  const getStatusBadgeClasses = () => {
+    if (isEnded) return 'bg-red-50 text-red-700 border border-red-200';
+    return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+  };
+
+  const getWorkflowBadgeClasses = () => {
+    switch (workflowState) {
+      case 'pending_sale': return 'bg-amber-50 text-amber-700 border border-amber-200';
+      case 'shipping': return 'bg-blue-50 text-blue-700 border border-blue-200';
+      default: return 'bg-slate-100 text-slate-600 border border-slate-200';
+    }
+  };
+
   return (
-    <main className={styles.main}>
-      <div className={styles.container}>
+    <main className="min-h-screen bg-slate-50">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         {/* Header Section */}
-        <div className={styles.header}>
-          <div className={styles.headerTop}>
-            <div className={styles.titleSection}>
-              <h1 className={styles.title}>{auction.title}</h1>
+        <div className="space-y-6 mb-8">
+          {/* Back link */}
+          <Link href="/auctions" className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-primary-600 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-4 w-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+            </svg>
+            Back to Auctions
+          </Link>
+
+          {/* Title row */}
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900 mb-1">{auction.title}</h1>
               {auction.creator && (
-                <div className={styles.creator}>
-                  <span className={styles.creatorLabel}>Seller:</span>
-                  <span className={styles.creatorName}>{auction.creator.name || auction.creator.email}</span>
-                </div>
+                <p className="text-sm text-slate-500">
+                  <span className="text-slate-400">Seller:</span>{' '}
+                  <span className="font-medium text-slate-600">{auction.creator.name || auction.creator.email}</span>
+                </p>
               )}
             </div>
-            <div className={styles.badges}>
-              <Badge variant={isEnded ? 'error' : 'success'} size="md">
+            <div className="flex items-center gap-2">
+              <span className={`rounded-full px-3 py-1 text-xs font-medium ${getStatusBadgeClasses()}`}>
                 {auction.status}
-              </Badge>
+              </span>
               {workflowState && workflowState !== 'active' && (
-                <Badge variant={workflowState === 'pending_sale' ? 'warning' : workflowState === 'shipping' ? 'info' : 'default'} size="md">
+                <span className={`rounded-full px-3 py-1 text-xs font-medium ${getWorkflowBadgeClasses()}`}>
                   {workflowState.replace('_', ' ')}
-                </Badge>
+                </span>
               )}
             </div>
           </div>
 
           {/* Dispute Notice */}
           {disputes.length > 0 && (
-            <Card variant="outlined" padding="md" className={styles.disputeNoticeCard}>
-              <CardContent>
-                <div className={styles.disputeNotice}>
-                  <Badge variant="warning" size="md" style={{ marginBottom: 'var(--spacing-2)' }}>
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+              <div className="flex items-start gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5 text-amber-600 mt-0.5 shrink-0">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                </svg>
+                <div>
+                  <span className="inline-flex bg-amber-100 text-amber-800 border border-amber-300 rounded-full px-3 py-0.5 text-xs font-medium mb-2">
                     Dispute Pending
-                  </Badge>
-                  <p className={styles.disputeNoticeText}>
-                    {disputes.length === 1 
+                  </span>
+                  <p className="text-sm text-amber-800">
+                    {disputes.length === 1
                       ? 'A dispute has been opened for this auction and is currently pending review.'
                       : `${disputes.length} disputes have been opened for this auction and are currently pending review.`
                     }
                   </p>
                   {disputes.length === 1 && disputes[0].reason && (
-                    <p className={styles.disputeReason}>
+                    <p className="text-sm text-amber-700 mt-1">
                       <strong>Reason:</strong> {disputes[0].reason}
                     </p>
                   )}
-                  <div className={styles.disputeActions}>
-                    <Link href={`/profile?id=${getAuthUser()?.id || ''}`}>
-                      <Button variant="secondary" size="sm">
-                        View Disputes in Profile
-                      </Button>
+                  <div className="mt-3">
+                    <Link
+                      href={`/profile?id=${getAuthUser()?.id || ''}`}
+                      className="inline-flex bg-white border border-amber-300 text-amber-800 hover:bg-amber-50 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors"
+                    >
+                      View Disputes in Profile
                     </Link>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
 
           {/* Key Stats */}
-          <Card variant="elevated" padding="md" className={styles.statsCard}>
-            <CardContent>
-              <div className={styles.stats}>
-                <div className={styles.statItem}>
-                  <div className={styles.statLabel}>Current Bid</div>
-                  <div className={styles.currentBid}>
-                    {formatCurrency(auction.current_bid || auction.starting_price)}
-                  </div>
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="grid grid-cols-2 sm:grid-cols-3 divide-x divide-slate-200">
+              <div className="px-6 py-5">
+                <div className="text-xs text-slate-500 mb-1">Current Bid</div>
+                <div className="text-2xl font-bold text-primary-600">
+                  {formatCurrency(auction.current_bid || auction.starting_price)}
                 </div>
-                <div className={styles.statDivider}></div>
-                <div className={styles.statItem}>
-                  <div className={styles.statLabel}>Starting Price</div>
-                  <div className={styles.statValue}>
-                    {formatCurrency(auction.starting_price)}
-                  </div>
-                </div>
-                {!isEnded && (
-                  <>
-                    <div className={styles.statDivider}></div>
-                    <div className={styles.statItem}>
-                      <div className={styles.statLabel}>Time Remaining</div>
-                      <div className={styles.timeValue}>{timeRemaining}</div>
-                    </div>
-                  </>
-                )}
-                {isEnded && auction.closed_at && (
-                  <>
-                    <div className={styles.statDivider}></div>
-                    <div className={styles.statItem}>
-                      <div className={styles.statLabel}>Ended</div>
-                      <div className={styles.statValue}>
-                        {new Date(auction.closed_at).toLocaleDateString()}
-                      </div>
-                    </div>
-                  </>
-                )}
               </div>
-            </CardContent>
-          </Card>
+              <div className="px-6 py-5">
+                <div className="text-xs text-slate-500 mb-1">Starting Price</div>
+                <div className="text-lg font-semibold text-slate-900">
+                  {formatCurrency(auction.starting_price)}
+                </div>
+              </div>
+              {!isEnded && (
+                <div className="px-6 py-5 col-span-2 sm:col-span-1">
+                  <div className="text-xs text-slate-500 mb-1">Time Remaining</div>
+                  <div className="text-lg font-semibold text-slate-900">{timeRemaining}</div>
+                </div>
+              )}
+              {isEnded && auction.closed_at && (
+                <div className="px-6 py-5 col-span-2 sm:col-span-1">
+                  <div className="text-xs text-slate-500 mb-1">Ended</div>
+                  <div className="text-lg font-semibold text-slate-900">
+                    {new Date(auction.closed_at).toLocaleDateString()}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* Workflow Visualization */}
-          <Card variant="outlined" padding="md" className={styles.workflowCard}>
-            <CardHeader>
-              <CardTitle as="h2" className={styles.workflowTitle}>Auction Progress</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <WorkflowVisualization currentState={workflowState} />
-            </CardContent>
-          </Card>
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+            <h2 className="text-sm font-semibold text-slate-900 mb-2">Auction Progress</h2>
+            <WorkflowVisualization currentState={workflowState} />
+          </div>
         </div>
 
         {/* Main Content Grid */}
-        <div className={styles.contentGrid}>
-          {/* Left Column - Description */}
-          <div className={styles.leftColumn}>
-            <Card variant="outlined" padding="md" className={styles.descriptionCard}>
-              <CardHeader>
-                <CardTitle as="h2">Description</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div
-                  className={styles.description}
-                  dangerouslySetInnerHTML={{ __html: auction.description }}
-                />
-              </CardContent>
-            </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Description + Bid History */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Description */}
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">Description</h2>
+              {/* Intentionally uses dangerouslySetInnerHTML (XSS vulnerability) */}
+              <div
+                className="prose prose-slate max-w-none text-sm text-slate-600"
+                dangerouslySetInnerHTML={{ __html: auction.description }}
+              />
+            </div>
 
             {/* Bid History */}
-            <Card variant="outlined" padding="md" className={styles.bidHistoryCard}>
-              <CardHeader>
-                <CardTitle as="h2">Bid History</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <BidHistory auctionId={auctionId} />
-              </CardContent>
-            </Card>
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">Bid History</h2>
+              <BidHistory auctionId={auctionId} />
+            </div>
           </div>
 
           {/* Right Column - Phase Actions */}
-          <div className={styles.rightColumn}>
+          <div className="space-y-6">
             {mounted && (
               <>
                 {workflowState === 'active' && (

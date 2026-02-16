@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
-import { Card, CardHeader, CardTitle, CardContent, Button, Input, Textarea, Badge } from '@design-system/components';
 import { formatCurrency } from '@design-system/utils';
-import styles from './PhaseComponents.module.css';
 
 interface PendingSalePhaseProps {
   auction: any;
@@ -80,7 +78,7 @@ export default function PendingSalePhase({ auction, order, isSeller, isBuyer, on
     }
 
     await handleUpdateOrder(updates);
-    
+
     // Also update workflow state
     try {
       await api.updateWorkflowState(auction.id, 'shipping');
@@ -92,196 +90,166 @@ export default function PendingSalePhase({ auction, order, isSeller, isBuyer, on
 
   if (isBuyer && !order) {
     return (
-      <div className={styles.phaseContainer}>
-        <Card variant="outlined" padding="md" className={styles.buyerCard}>
-          <CardHeader>
-            <CardTitle>Action Required: Complete Your Purchase</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={styles.alertMessage} style={{ 
-              padding: '12px', 
-              marginBottom: '16px', 
-              backgroundColor: '#fff3cd', 
-              border: '1px solid #ffc107', 
-              borderRadius: '4px' 
-            }}>
-              <p style={{ margin: 0, fontWeight: '500', color: '#856404' }}>
-                ⚠️ The seller is waiting for you to complete payment and shipping details. 
-                Please provide your shipping address below to proceed with your purchase.
-              </p>
-            </div>
+      <div className="bg-white rounded-xl border-l-4 border-l-amber-500 border border-slate-200 shadow-sm p-6">
+        <h3 className="text-lg font-semibold text-slate-900 mb-4">Action Required: Complete Your Purchase</h3>
 
-            <div className={styles.orderSummary}>
-              <h3 className={styles.sectionTitle}>Order Summary</h3>
-              <div className={styles.summaryItem}>
-                <span>Item:</span>
-                <strong>{auction.title}</strong>
-              </div>
-              <div className={styles.summaryItem}>
-                <span>Winning Bid:</span>
-                <strong>{formatCurrency(auction.current_bid)}</strong>
-              </div>
-            </div>
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-5">
+          <p className="text-sm font-medium text-amber-800">
+            The seller is waiting for you to complete payment and shipping details.
+            Please provide your shipping address below to proceed with your purchase.
+          </p>
+        </div>
 
-            <div className={styles.formSection}>
-              <Textarea
-                label="Shipping Address"
-                value={shippingAddress}
-                onChange={(e) => setShippingAddress(e.target.value)}
-                placeholder="Enter your full shipping address"
-                rows={4}
-                fullWidth
-                required
-              />
-            </div>
+        <div className="space-y-3 mb-5">
+          <h4 className="text-sm font-semibold text-slate-900">Order Summary</h4>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-slate-500">Item:</span>
+            <strong className="text-slate-900">{auction.title}</strong>
+          </div>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-slate-500">Winning Bid:</span>
+            <strong className="text-primary-600">{formatCurrency(auction.current_bid)}</strong>
+          </div>
+        </div>
 
-            <Button
-              variant="primary"
-              onClick={handleCreateOrder}
-              disabled={creatingOrder || !shippingAddress.trim()}
-              isLoading={creatingOrder}
-              fullWidth
-            >
-              {creatingOrder ? 'Creating Order...' : 'Complete Purchase & Submit Shipping Details'}
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="mb-5">
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Shipping Address</label>
+          <textarea
+            value={shippingAddress}
+            onChange={(e) => setShippingAddress(e.target.value)}
+            placeholder="Enter your full shipping address"
+            rows={4}
+            required
+            className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors resize-none"
+          />
+        </div>
+
+        <button
+          onClick={handleCreateOrder}
+          disabled={creatingOrder || !shippingAddress.trim()}
+          className="w-full bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg px-4 py-3 text-sm transition-colors"
+        >
+          {creatingOrder ? 'Creating Order...' : 'Complete Purchase & Submit Shipping Details'}
+        </button>
       </div>
     );
   }
 
   return (
-    <div className={styles.phaseContainer}>
+    <div className="space-y-6">
       {isBuyer && order && (
-        <Card variant="outlined" padding="md" className={styles.buyerCard}>
-          <CardHeader>
-            <CardTitle>Review Order Details</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={styles.orderDetails}>
-              <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Order Status:</span>
-                <Badge variant="warning" size="sm">{order.status || 'pending_payment'}</Badge>
-              </div>
-              <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Total Amount:</span>
-                <strong>{formatCurrency(order.total_amount)}</strong>
-              </div>
-              <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Shipping Address:</span>
-                <span>{order.shipping_address || 'Not provided'}</span>
-              </div>
-              {order.tracking_number && (
-                <div className={styles.detailRow}>
-                  <span className={styles.detailLabel}>Tracking Number:</span>
-                  <span>{order.tracking_number}</span>
-                </div>
-              )}
+        <div className="bg-white rounded-xl border-l-4 border-l-amber-500 border border-slate-200 shadow-sm p-6">
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">Review Order Details</h3>
+          <div className="space-y-3 mb-4">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-slate-500">Order Status:</span>
+              <span className="bg-amber-50 text-amber-700 border border-amber-200 rounded-full px-3 py-1 text-xs font-medium">
+                {order.status || 'pending_payment'}
+              </span>
             </div>
-            {order.status === 'pending_payment' && (
-              <div className={styles.alertMessage} style={{ 
-                padding: '12px', 
-                marginTop: '16px', 
-                backgroundColor: '#fff3cd', 
-                border: '1px solid #ffc107', 
-                borderRadius: '4px' 
-              }}>
-                <p style={{ margin: 0, fontWeight: '500', color: '#856404' }}>
-                  ⚠️ Payment is pending. Please complete payment to proceed.
-                </p>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-slate-500">Total Amount:</span>
+              <strong className="text-slate-900">{formatCurrency(order.total_amount)}</strong>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-slate-500">Shipping Address:</span>
+              <span className="text-slate-700 text-right max-w-[200px]">{order.shipping_address || 'Not provided'}</span>
+            </div>
+            {order.tracking_number && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-500">Tracking Number:</span>
+                <span className="text-slate-700">{order.tracking_number}</span>
               </div>
             )}
-            <p className={styles.infoText}>
-              {order.status === 'pending_payment' 
-                ? 'Your order has been created. Please complete payment to proceed.'
-                : 'Waiting for seller to add tracking information and mark as shipped.'}
-            </p>
-          </CardContent>
-        </Card>
+          </div>
+          {order.status === 'pending_payment' && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+              <p className="text-sm font-medium text-amber-800">
+                Payment is pending. Please complete payment to proceed.
+              </p>
+            </div>
+          )}
+          <p className="text-xs text-slate-500">
+            {order.status === 'pending_payment'
+              ? 'Your order has been created. Please complete payment to proceed.'
+              : 'Waiting for seller to add tracking information and mark as shipped.'}
+          </p>
+        </div>
       )}
 
       {isSeller && !order && (
-        <Card variant="outlined" padding="md" className={styles.sellerCard}>
-          <CardHeader>
-            <CardTitle>Waiting for Buyer</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={styles.alertMessage} style={{ 
-              padding: '12px', 
-              marginBottom: '16px', 
-              backgroundColor: '#d1ecf1', 
-              border: '1px solid #bee5eb', 
-              borderRadius: '4px' 
-            }}>
-              <p style={{ margin: 0, fontWeight: '500', color: '#0c5460' }}>
-                ⏳ Waiting for the buyer to complete payment and provide shipping details. 
-                Once the buyer submits their information, you'll be able to prepare the shipment.
-              </p>
+        <div className="bg-white rounded-xl border-l-4 border-l-amber-500 border border-slate-200 shadow-sm p-6">
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">Waiting for Buyer</h3>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+            <p className="text-sm font-medium text-blue-800">
+              Waiting for the buyer to complete payment and provide shipping details.
+              Once the buyer submits their information, you&apos;ll be able to prepare the shipment.
+            </p>
+          </div>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-slate-500">Winning Bid:</span>
+              <strong className="text-primary-600">{formatCurrency(auction.current_bid)}</strong>
             </div>
-            <div className={styles.orderDetails}>
-              <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Winning Bid:</span>
-                <strong>{formatCurrency(auction.current_bid)}</strong>
-              </div>
-              <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Status:</span>
-                <Badge variant="warning" size="sm">Pending Buyer Action</Badge>
-              </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-slate-500">Status:</span>
+              <span className="bg-amber-50 text-amber-700 border border-amber-200 rounded-full px-3 py-1 text-xs font-medium">
+                Pending Buyer Action
+              </span>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       {isSeller && order && (
-        <Card variant="outlined" padding="md" className={styles.sellerCard}>
-          <CardHeader>
-            <CardTitle>Prepare for Shipping</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={styles.orderDetails}>
-              <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Buyer:</span>
-                <span>{order.buyer?.name || order.buyer?.email || `User ${order.buyer_id}`}</span>
-              </div>
-              <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Shipping Address:</span>
-                <span>{order.shipping_address || 'Not provided'}</span>
-              </div>
-              <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Total Amount:</span>
-                <strong>{formatCurrency(order.total_amount)}</strong>
-              </div>
+        <div className="bg-white rounded-xl border-l-4 border-l-amber-500 border border-slate-200 shadow-sm p-6">
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">Prepare for Shipping</h3>
+          <div className="space-y-3 mb-5">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-slate-500">Buyer:</span>
+              <span className="text-slate-700">{order.buyer?.name || order.buyer?.email || `User ${order.buyer_id}`}</span>
             </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-slate-500">Shipping Address:</span>
+              <span className="text-slate-700 text-right max-w-[200px]">{order.shipping_address || 'Not provided'}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-slate-500">Total Amount:</span>
+              <strong className="text-slate-900">{formatCurrency(order.total_amount)}</strong>
+            </div>
+          </div>
 
-            <div className={styles.formSection}>
-              <Input
-                label="Tracking Number"
+          <div className="space-y-4 mb-5">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Tracking Number</label>
+              <input
+                type="text"
                 value={trackingNumber}
                 onChange={(e) => setTrackingNumber(e.target.value)}
                 placeholder="Enter tracking number"
-                fullWidth
+                className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
               />
-              <Input
-                label="Tracking URL (optional)"
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Tracking URL (optional)</label>
+              <input
+                type="url"
                 value={trackingUrl}
                 onChange={(e) => setTrackingUrl(e.target.value)}
                 placeholder="https://tracking.example.com/..."
-                type="url"
-                fullWidth
+                className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
               />
             </div>
+          </div>
 
-            <Button
-              variant="primary"
-              onClick={handleMarkAsShipped}
-              disabled={updating || (!trackingNumber.trim() && !trackingUrl.trim())}
-              isLoading={updating}
-              fullWidth
-            >
-              {updating ? 'Updating...' : 'Mark as Shipped'}
-            </Button>
-          </CardContent>
-        </Card>
+          <button
+            onClick={handleMarkAsShipped}
+            disabled={updating || (!trackingNumber.trim() && !trackingUrl.trim())}
+            className="w-full bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg px-4 py-3 text-sm transition-colors"
+          >
+            {updating ? 'Updating...' : 'Mark as Shipped'}
+          </button>
+        </div>
       )}
     </div>
   );

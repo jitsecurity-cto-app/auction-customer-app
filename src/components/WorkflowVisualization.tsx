@@ -1,8 +1,5 @@
 'use client';
 
-import { Badge } from '@design-system/components';
-import styles from './WorkflowVisualization.module.css';
-
 type WorkflowState = 'active' | 'pending_sale' | 'shipping' | 'complete';
 
 interface WorkflowVisualizationProps {
@@ -11,7 +8,7 @@ interface WorkflowVisualizationProps {
 
 const workflowSteps = [
   { id: 'active', label: 'Active Bidding', key: 'active' as WorkflowState },
-  { id: 'pending_sale', label: 'Pending Sale Completion', key: 'pending_sale' as WorkflowState },
+  { id: 'pending_sale', label: 'Pending Sale', key: 'pending_sale' as WorkflowState },
   { id: 'shipping', label: 'Shipped', key: 'shipping' as WorkflowState },
   { id: 'complete', label: 'Complete', key: 'complete' as WorkflowState },
 ];
@@ -20,7 +17,7 @@ export default function WorkflowVisualization({ currentState }: WorkflowVisualiz
   const getStepStatus = (stepKey: WorkflowState) => {
     const currentIndex = workflowSteps.findIndex(s => s.key === currentState);
     const stepIndex = workflowSteps.findIndex(s => s.key === stepKey);
-    
+
     if (stepIndex < currentIndex) {
       return 'completed';
     } else if (stepIndex === currentIndex) {
@@ -30,40 +27,57 @@ export default function WorkflowVisualization({ currentState }: WorkflowVisualiz
     }
   };
 
-  const getBadgeVariant = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return 'success';
-      case 'active':
-        return 'info';
-      default:
-        return 'default';
-    }
-  };
-
   return (
-    <div className={styles.container}>
-      <div className={styles.workflowSteps}>
+    <div className="py-4">
+      <div className="flex items-center justify-between">
         {workflowSteps.map((step, index) => {
           const status = getStepStatus(step.key);
           const isLast = index === workflowSteps.length - 1;
-          const prevStatus = index > 0 ? getStepStatus(workflowSteps[index - 1].key) : null;
-          
+
           return (
-            <div key={step.id} className={styles.stepContainer}>
-              <div className={styles.step}>
-                <div className={`${styles.stepCircle} ${styles[status]}`}>
-                  {status === 'completed' && <span className={styles.checkmark}>✓</span>}
-                  {status === 'active' && <span className={styles.activeDot}></span>}
-                  {status === 'pending' && <span className={styles.pendingDot}></span>}
+            <div key={step.id} className="flex items-center flex-1 last:flex-none">
+              {/* Step circle + label */}
+              <div className="flex flex-col items-center">
+                <div
+                  className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-colors ${
+                    status === 'completed'
+                      ? 'bg-primary-600 border-primary-600'
+                      : status === 'active'
+                      ? 'bg-primary-600 border-primary-600 animate-pulse'
+                      : 'bg-white border-slate-300'
+                  }`}
+                >
+                  {status === 'completed' && (
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="h-5 w-5 text-white">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                    </svg>
+                  )}
+                  {status === 'active' && (
+                    <div className="w-3 h-3 rounded-full bg-white" />
+                  )}
+                  {status === 'pending' && (
+                    <div className="w-3 h-3 rounded-full bg-slate-300" />
+                  )}
                 </div>
-                <Badge variant={getBadgeVariant(status)} size="sm" className={styles.stepBadge}>
+                <span
+                  className={`mt-2 text-xs font-medium text-center max-w-[80px] ${
+                    status === 'completed' || status === 'active'
+                      ? 'text-primary-700'
+                      : 'text-slate-400'
+                  }`}
+                >
                   {step.label}
-                </Badge>
+                </span>
               </div>
+
+              {/* Connecting line */}
               {!isLast && (
-                <div className={`${styles.arrow} ${prevStatus === 'completed' || status === 'completed' ? styles.completed : ''}`}>
-                  →
+                <div className="flex-1 mx-2 mb-6">
+                  <div
+                    className={`h-0.5 w-full ${
+                      status === 'completed' ? 'bg-primary-600' : 'bg-slate-200'
+                    }`}
+                  />
                 </div>
               )}
             </div>

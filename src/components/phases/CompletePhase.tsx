@@ -2,9 +2,7 @@
 
 import { useState } from 'react';
 import { api } from '@/lib/api';
-import { Card, CardHeader, CardTitle, CardContent, Button, Textarea, Badge } from '@design-system/components';
 import { formatCurrency } from '@design-system/utils';
-import styles from './PhaseComponents.module.css';
 
 interface CompletePhaseProps {
   auction: any;
@@ -36,7 +34,7 @@ export default function CompletePhase({ auction, order, isSeller, isBuyer, onUpd
         reason: disputeReason,
         filed_by_role: isSeller ? 'seller' : 'buyer',
       });
-      
+
       alert('Dispute filed successfully. Our support team will review it shortly.');
       setDisputeReason('');
       onUpdate();
@@ -53,52 +51,54 @@ export default function CompletePhase({ auction, order, isSeller, isBuyer, onUpd
   };
 
   return (
-    <div className={styles.phaseContainer}>
-      <Card variant="outlined" padding="md" className={styles.completeCard}>
-        <CardHeader>
-          <CardTitle>Transaction Complete</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className={styles.completionInfo}>
-            <Badge variant="success" size="md">✓ Completed</Badge>
-            <div className={styles.detailRow}>
-              <span className={styles.detailLabel}>Final Amount:</span>
-              <strong>{formatCurrency(order?.total_amount || auction.current_bid)}</strong>
-            </div>
-            {order?.completed_at && (
-              <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Completed On:</span>
-                <span>{new Date(order.completed_at).toLocaleDateString()}</span>
-              </div>
-            )}
-          </div>
+    <div className="bg-white rounded-xl border-l-4 border-l-emerald-500 border border-slate-200 shadow-sm p-6">
+      <h3 className="text-lg font-semibold text-slate-900 mb-4">Transaction Complete</h3>
 
-          <div className={styles.disputeSection}>
-            <h3 className={styles.sectionTitle}>File a Dispute</h3>
-            <p className={styles.infoText}>
-              If you have any issues with this transaction, you can file a dispute. 
-              Our support team will review it and contact you.
-            </p>
-            <Textarea
-              label="Dispute Reason"
-              value={disputeReason}
-              onChange={(e) => setDisputeReason(e.target.value)}
-              placeholder="Describe the issue..."
-              rows={4}
-              fullWidth
-            />
-            <Button
-              variant="danger"
-              onClick={handleFileDispute}
-              disabled={filingDispute || !disputeReason.trim()}
-              isLoading={filingDispute}
-              fullWidth
-            >
-              {filingDispute ? 'Filing Dispute...' : 'File Dispute'}
-            </Button>
+      <div className="space-y-3 mb-6">
+        <div className="flex items-center gap-2 mb-3">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-5 w-5 text-emerald-600">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          </svg>
+          <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full px-3 py-1 text-xs font-medium">
+            Completed
+          </span>
+        </div>
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-slate-500">Final Amount:</span>
+          <strong className="text-slate-900">{formatCurrency(order?.total_amount || auction.current_bid)}</strong>
+        </div>
+        {order?.completed_at && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-slate-500">Completed On:</span>
+            <span className="text-slate-700">{new Date(order.completed_at).toLocaleDateString()}</span>
           </div>
-        </CardContent>
-      </Card>
+        )}
+      </div>
+
+      <div className="border-t border-slate-200 pt-5">
+        <h4 className="text-sm font-semibold text-slate-900 mb-2">File a Dispute</h4>
+        <p className="text-xs text-slate-500 mb-4">
+          If you have any issues with this transaction, you can file a dispute.
+          Our support team will review it and contact you.
+        </p>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Dispute Reason</label>
+          <textarea
+            value={disputeReason}
+            onChange={(e) => setDisputeReason(e.target.value)}
+            placeholder="Describe the issue..."
+            rows={4}
+            className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors resize-none"
+          />
+        </div>
+        <button
+          onClick={handleFileDispute}
+          disabled={filingDispute || !disputeReason.trim()}
+          className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg px-4 py-3 text-sm transition-colors"
+        >
+          {filingDispute ? 'Filing Dispute...' : 'File Dispute'}
+        </button>
+      </div>
     </div>
   );
 }

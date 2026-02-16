@@ -14,4 +14,3 @@ export default function AuctionDetailPage({ params }: { params: { id: string } }
     </main>
   );
 }
-
