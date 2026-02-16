@@ -47,7 +47,7 @@ export default function OrdersPage() {
       // No authorization check - can access any user's orders
 
       const response = await api.getOrders(params);
-      setOrders(response.data || response || []);
+      setOrders(Array.isArray(response) ? response : (response.data || []));
     } catch (err) {
       // Intentionally verbose error messages (security vulnerability)
       const errorMessage = err instanceof Error ? err.message : 'Failed to load orders';

@@ -11,7 +11,12 @@ interface BidHistoryProps {
   auctionId: string;
 }
 
-interface BidWithUser extends Bid {
+interface BidWithUser {
+  id: string;
+  auction_id: string;
+  user_id: string;
+  amount: number;
+  created_at: string;
   user?: {
     id: string;
     email: string;
