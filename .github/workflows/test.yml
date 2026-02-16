@@ -36,7 +36,8 @@ jobs:
           path: design-system
 
       - name: Link design system
-        run: ln -s $GITHUB_WORKSPACE/design-system ../design-system
+        run: |
+          ln -s $GITHUB_WORKSPACE/design-system ../design-system
 
       - name: Checkout database service
         uses: actions/checkout@v4
@@ -83,6 +84,9 @@ jobs:
 
       - name: Install customer app dependencies
         run: npm ci
+
+      - name: Link design system node_modules
+        run: ln -s $GITHUB_WORKSPACE/node_modules $GITHUB_WORKSPACE/design-system/node_modules
 
       - name: Run linter
         run: npm run lint
