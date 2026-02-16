@@ -133,11 +133,11 @@ export async function verifyToken(): Promise<User | null> {
   }
 
   try {
-    const response = await (api as any).post<{ valid: boolean; user: User }>(
+    const response = await (api as any).post(
       '/auth/verify',
       {},
       true
-    );
+    ) as { valid: boolean; user: User };
     return response.valid ? response.user : null;
   } catch {
     return null;

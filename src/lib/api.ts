@@ -143,7 +143,7 @@ export const api = {
   async post<T>(endpoint: string, body: unknown, requireAuth = false): Promise<T> {
     return apiRequest<T>(endpoint, {
       method: 'POST',
-      body,
+      body: body as BodyInit,
       requireAuth,
     });
   },
@@ -151,7 +151,7 @@ export const api = {
   async put<T>(endpoint: string, body: unknown, requireAuth = true): Promise<T> {
     return apiRequest<T>(endpoint, {
       method: 'PUT',
-      body,
+      body: body as BodyInit,
       requireAuth,
     });
   },
