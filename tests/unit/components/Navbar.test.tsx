@@ -27,7 +27,7 @@ describe('Navbar', () => {
 
     render(<Navbar />);
 
-    expect(screen.getByText('Auction Platform')).toBeInTheDocument();
+    expect(screen.getByText('Auction')).toBeInTheDocument();
     expect(screen.getByText('Auctions')).toBeInTheDocument();
   });
 

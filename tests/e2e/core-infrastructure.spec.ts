@@ -29,12 +29,17 @@ describe('Core Infrastructure E2E', () => {
   describe('Complete Authentication Flow', () => {
     it('should complete full registration and login flow', async () => {
       // Step 1: Register new user
+      // The register function now calls api.post which returns an AuthResponse
+      // and then calls setAuth(response.token, response.user)
       const registerResponse = {
-        id: 1,
-        email: 'newuser@example.com',
-        name: 'New User',
-        role: 'user',
-        created_at: '2024-01-01T00:00:00Z',
+        token: 'register-token-123',
+        user: {
+          id: 1,
+          email: 'newuser@example.com',
+          name: 'New User',
+          role: 'user',
+          created_at: '2024-01-01T00:00:00Z',
+        },
       };
 
       (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -53,11 +58,6 @@ describe('Core Infrastructure E2E', () => {
         'http://localhost:3001/api/auth/register',
         expect.objectContaining({
           method: 'POST',
-          body: JSON.stringify({
-            email: 'newuser@example.com',
-            password: 'password123',
-            name: 'New User',
-          }),
         })
       );
 

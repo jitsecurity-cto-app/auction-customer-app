@@ -30,13 +30,13 @@ describe('RegisterForm', () => {
     expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /register/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /create account/i })).toBeInTheDocument();
   });
 
   it('shows link to login page', () => {
     render(<RegisterForm />);
 
-    const loginLink = screen.getByText(/login here/i);
+    const loginLink = screen.getByText(/sign in/i);
     expect(loginLink).toBeInTheDocument();
     expect(loginLink.closest('a')).toHaveAttribute('href', '/login');
   });
@@ -53,7 +53,7 @@ describe('RegisterForm', () => {
     const nameInput = screen.getByLabelText(/name/i);
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/password/i);
-    const submitButton = screen.getByRole('button', { name: /register/i });
+    const submitButton = screen.getByRole('button', { name: /create account/i });
 
     fireEvent.change(nameInput, { target: { value: 'Test User' } });
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
@@ -81,7 +81,7 @@ describe('RegisterForm', () => {
     const nameInput = screen.getByLabelText(/name/i);
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/password/i);
-    const submitButton = screen.getByRole('button', { name: /register/i });
+    const submitButton = screen.getByRole('button', { name: /create account/i });
 
     fireEvent.change(nameInput, { target: { value: 'Test User' } });
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
@@ -103,7 +103,7 @@ describe('RegisterForm', () => {
     const nameInput = screen.getByLabelText(/name/i);
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/password/i);
-    const submitButton = screen.getByRole('button', { name: /register/i });
+    const submitButton = screen.getByRole('button', { name: /create account/i });
 
     fireEvent.change(nameInput, { target: { value: 'Test User' } });
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
@@ -134,18 +134,18 @@ describe('RegisterForm', () => {
     const nameInput = screen.getByLabelText(/name/i);
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/password/i);
-    const submitButton = screen.getByRole('button', { name: /register/i });
+    const submitButton = screen.getByRole('button', { name: /create account/i });
 
     fireEvent.change(nameInput, { target: { value: 'Test User' } });
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     fireEvent.change(passwordInput, { target: { value: 'password123' } });
     fireEvent.click(submitButton);
 
-    expect(screen.getByText(/registering/i)).toBeInTheDocument();
+    expect(screen.getByText(/creating account/i)).toBeInTheDocument();
     expect(submitButton).toBeDisabled();
 
     await waitFor(() => {
-      expect(screen.queryByText(/registering/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/creating account/i)).not.toBeInTheDocument();
     });
   });
 
@@ -161,7 +161,7 @@ describe('RegisterForm', () => {
     const nameInput = screen.getByLabelText(/name/i);
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/password/i);
-    const submitButton = screen.getByRole('button', { name: /register/i });
+    const submitButton = screen.getByRole('button', { name: /create account/i });
 
     // Use a very weak password
     fireEvent.change(nameInput, { target: { value: 'Test User' } });

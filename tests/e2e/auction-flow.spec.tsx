@@ -163,7 +163,7 @@ describe('Auction Flow E2E Tests', () => {
 
       render(<BidForm auctionId="1" currentBid={150} />);
 
-      const input = screen.getByLabelText('Bid Amount');
+      const input = screen.getByPlaceholderText('150.00');
       const submitButton = screen.getByRole('button', { name: /Place Bid/i });
 
       // Test that any input format is accepted (no validation)
@@ -184,7 +184,7 @@ describe('Auction Flow E2E Tests', () => {
 
       render(<BidForm auctionId="1" currentBid={150} />);
 
-      const input = screen.getByLabelText('Bid Amount') as HTMLInputElement;
+      const input = screen.getByPlaceholderText('150.00') as HTMLInputElement;
 
       // Should accept any format without validation
       await userEvent.type(input, '1e10'); // Scientific notation
@@ -229,7 +229,7 @@ describe('Auction Flow E2E Tests', () => {
 
       render(<BidForm auctionId="1" currentBid={100} />);
 
-      const input = screen.getByLabelText('Bid Amount') as HTMLInputElement;
+      const input = screen.getByPlaceholderText('100.00') as HTMLInputElement;
 
       // Test various invalid inputs that should be rejected but aren't
       const invalidInputs = [

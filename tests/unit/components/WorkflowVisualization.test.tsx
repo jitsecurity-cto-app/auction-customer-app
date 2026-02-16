@@ -11,7 +11,7 @@ describe('WorkflowVisualization', () => {
     render(<WorkflowVisualization currentState="active" />);
 
     expect(screen.getByText('Active Bidding')).toBeInTheDocument();
-    expect(screen.getByText('Pending Sale Completion')).toBeInTheDocument();
+    expect(screen.getByText('Pending Sale')).toBeInTheDocument();
     expect(screen.getByText('Shipped')).toBeInTheDocument();
     expect(screen.getByText('Complete')).toBeInTheDocument();
   });
@@ -19,8 +19,8 @@ describe('WorkflowVisualization', () => {
   it('should mark active state correctly', () => {
     const { container } = render(<WorkflowVisualization currentState="active" />);
 
-    // Check that active step is marked
-    const activeStep = container.querySelector('[class*="active"]');
+    // Check that active step has the pulse animation class
+    const activeStep = container.querySelector('[class*="animate-pulse"]');
     expect(activeStep).toBeInTheDocument();
   });
 
@@ -28,11 +28,11 @@ describe('WorkflowVisualization', () => {
     const { container } = render(<WorkflowVisualization currentState="pending_sale" />);
 
     // Active step should be pending_sale
-    expect(screen.getByText('Pending Sale Completion')).toBeInTheDocument();
-    
-    // Previous step (active) should be completed
-    const completedSteps = container.querySelectorAll('[class*="completed"]');
-    expect(completedSteps.length).toBeGreaterThan(0);
+    expect(screen.getByText('Pending Sale')).toBeInTheDocument();
+
+    // Previous step (active) should be completed - look for SVG checkmark icons
+    const checkIcons = container.querySelectorAll('svg path[d*="m4.5 12.75"]');
+    expect(checkIcons.length).toBeGreaterThan(0);
   });
 
   it('should mark completed states correctly for shipping', () => {
@@ -45,33 +45,35 @@ describe('WorkflowVisualization', () => {
     const { container } = render(<WorkflowVisualization currentState="complete" />);
 
     expect(screen.getByText('Complete')).toBeInTheDocument();
-    
-    // All steps should be completed
-    const completedSteps = container.querySelectorAll('[class*="completed"]');
-    expect(completedSteps.length).toBeGreaterThan(0);
+
+    // All previous steps should be completed - look for SVG checkmark icons
+    const checkIcons = container.querySelectorAll('svg path[d*="m4.5 12.75"]');
+    expect(checkIcons.length).toBeGreaterThan(0);
   });
 
   it('should display checkmarks for completed steps', () => {
     const { container } = render(<WorkflowVisualization currentState="complete" />);
 
-    // Check for checkmark symbols
-    const checkmarks = container.querySelectorAll('[class*="checkmark"]');
-    expect(checkmarks.length).toBeGreaterThan(0);
+    // Check for SVG checkmark icons (used for completed steps)
+    const checkIcons = container.querySelectorAll('svg path[d*="m4.5 12.75"]');
+    expect(checkIcons.length).toBeGreaterThan(0);
   });
 
   it('should display active dot for current step', () => {
     const { container } = render(<WorkflowVisualization currentState="pending_sale" />);
 
-    const activeDots = container.querySelectorAll('[class*="activeDot"]');
+    // Active step has an animate-pulse circle
+    const activeDots = container.querySelectorAll('[class*="animate-pulse"]');
     expect(activeDots.length).toBeGreaterThan(0);
   });
 
-  it('should display arrows between steps', () => {
+  it('should display connecting lines between steps', () => {
     const { container } = render(<WorkflowVisualization currentState="active" />);
 
-    const arrows = container.querySelectorAll('[class*="arrow"]');
-    // Should have 3 arrows for 4 steps
-    expect(arrows.length).toBe(3);
+    // Connecting lines use h-0.5 class
+    const lines = container.querySelectorAll('[class*="h-0.5"]');
+    // Should have 3 connecting lines for 4 steps
+    expect(lines.length).toBe(3);
   });
 
   it('should apply correct badge variants', () => {
@@ -84,11 +86,11 @@ describe('WorkflowVisualization', () => {
 
   it('should handle state transitions correctly', () => {
     const { rerender } = render(<WorkflowVisualization currentState="active" />);
-    
+
     expect(screen.getByText('Active Bidding')).toBeInTheDocument();
 
     rerender(<WorkflowVisualization currentState="pending_sale" />);
-    expect(screen.getByText('Pending Sale Completion')).toBeInTheDocument();
+    expect(screen.getByText('Pending Sale')).toBeInTheDocument();
 
     rerender(<WorkflowVisualization currentState="shipping" />);
     expect(screen.getByText('Shipped')).toBeInTheDocument();

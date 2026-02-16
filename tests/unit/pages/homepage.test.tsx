@@ -54,9 +54,9 @@ describe('HomePage', () => {
 
     render(<HomePage />);
 
-    expect(screen.getByText('View All Active')).toBeInTheDocument();
+    expect(screen.getByText('View Active Auctions')).toBeInTheDocument();
     expect(screen.getByText('View Ended')).toBeInTheDocument();
-    expect(screen.getByText('View All Auctions')).toBeInTheDocument();
+    expect(screen.getByText('Browse All')).toBeInTheDocument();
   });
 
   it('should show create auction button when authenticated', () => {
@@ -97,14 +97,14 @@ describe('HomePage', () => {
 
     render(<HomePage />);
 
-    const viewAllActiveLink = screen.getByText('View All Active').closest('a');
-    expect(viewAllActiveLink).toHaveAttribute('href', '/auctions?status=active');
+    const viewActiveLink = screen.getByText('View Active Auctions').closest('a');
+    expect(viewActiveLink).toHaveAttribute('href', '/auctions?status=active');
 
     const viewEndedLink = screen.getByText('View Ended').closest('a');
     expect(viewEndedLink).toHaveAttribute('href', '/auctions?status=ended');
 
-    const viewAllLink = screen.getByText('View All Auctions').closest('a');
-    expect(viewAllLink).toHaveAttribute('href', '/auctions');
+    const browseAllLink = screen.getByText('Browse All').closest('a');
+    expect(browseAllLink).toHaveAttribute('href', '/auctions');
   });
 
   it('should have create auction link when authenticated', () => {

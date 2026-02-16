@@ -255,7 +255,7 @@ describe('Dashboard Page', () => {
     await waitFor(() => {
       expect(screen.getByText('Shipped Auction')).toBeInTheDocument();
       // Multiple auctions may have order status displayed
-      expect(screen.getAllByText(/Order Status:/).length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText(/Order:/).length).toBeGreaterThanOrEqual(1);
     });
   });
 });

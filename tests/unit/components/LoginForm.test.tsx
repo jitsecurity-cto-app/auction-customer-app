@@ -29,13 +29,13 @@ describe('LoginForm', () => {
 
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
   });
 
   it('shows link to register page', () => {
     render(<LoginForm />);
 
-    const registerLink = screen.getByText(/register here/i);
+    const registerLink = screen.getByText(/register/i);
     expect(registerLink).toBeInTheDocument();
     expect(registerLink.closest('a')).toHaveAttribute('href', '/register');
   });
@@ -51,7 +51,7 @@ describe('LoginForm', () => {
 
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/password/i);
-    const submitButton = screen.getByRole('button', { name: /login/i });
+    const submitButton = screen.getByRole('button', { name: /sign in/i });
 
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     fireEvent.change(passwordInput, { target: { value: 'password123' } });
@@ -76,7 +76,7 @@ describe('LoginForm', () => {
 
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/password/i);
-    const submitButton = screen.getByRole('button', { name: /login/i });
+    const submitButton = screen.getByRole('button', { name: /sign in/i });
 
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     fireEvent.change(passwordInput, { target: { value: 'password123' } });
@@ -96,7 +96,7 @@ describe('LoginForm', () => {
 
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/password/i);
-    const submitButton = screen.getByRole('button', { name: /login/i });
+    const submitButton = screen.getByRole('button', { name: /sign in/i });
 
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     fireEvent.change(passwordInput, { target: { value: 'wrongpassword' } });
@@ -125,17 +125,17 @@ describe('LoginForm', () => {
 
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/password/i);
-    const submitButton = screen.getByRole('button', { name: /login/i });
+    const submitButton = screen.getByRole('button', { name: /sign in/i });
 
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     fireEvent.change(passwordInput, { target: { value: 'password123' } });
     fireEvent.click(submitButton);
 
-    expect(screen.getByText(/logging in/i)).toBeInTheDocument();
+    expect(screen.getByText(/signing in/i)).toBeInTheDocument();
     expect(submitButton).toBeDisabled();
 
     await waitFor(() => {
-      expect(screen.queryByText(/logging in/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/signing in/i)).not.toBeInTheDocument();
     });
   });
 
@@ -150,7 +150,7 @@ describe('LoginForm', () => {
 
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/password/i);
-    const submitButton = screen.getByRole('button', { name: /login/i });
+    const submitButton = screen.getByRole('button', { name: /sign in/i });
 
     // HTML5 validation will still catch invalid email format, but we're testing
     // that our code doesn't do additional validation

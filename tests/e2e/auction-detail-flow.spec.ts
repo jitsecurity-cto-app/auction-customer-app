@@ -76,7 +76,7 @@ describe('Auction Detail & Bidding Flow E2E', () => {
       },
       body: JSON.stringify({
         title: 'Test Auction with XSS',
-        description: '<img src=x onerror="alert(\'XSS\')">Malicious Description',
+        description: '<img src=x onerror="alert(document.cookie)">Malicious Description',
         starting_price: 100,
         end_time: new Date(Date.now() + 86400000).toISOString(),
       }),
@@ -96,7 +96,7 @@ describe('Auction Detail & Bidding Flow E2E', () => {
 
       expect(response.ok).toBe(true);
       const data = await response.json();
-      expect(data.id).toBe(auctionId);
+      expect(Number(data.id)).toBe(Number(auctionId));
       expect(data.title).toBe('Test Auction with XSS');
     });
 
@@ -126,7 +126,7 @@ describe('Auction Detail & Bidding Flow E2E', () => {
 
       expect(response.ok).toBe(true);
       const data = await response.json();
-      expect(data.id).toBe(auctionId);
+      expect(Number(data.id)).toBe(Number(auctionId));
       // No authorization check - buyer can see seller's auction
     });
   });
@@ -144,9 +144,9 @@ describe('Auction Detail & Bidding Flow E2E', () => {
 
       expect(bidResponse.ok).toBe(true);
       const bidData = await bidResponse.json();
-      expect(bidData.amount).toBe(150);
-      expect(bidData.auction_id).toBe(auctionId);
-      expect(bidData.user_id).toBe(buyerId);
+      expect(parseFloat(bidData.amount)).toBe(150);
+      expect(Number(bidData.auction_id)).toBe(Number(auctionId));
+      expect(Number(bidData.user_id)).toBe(Number(buyerId));
     });
 
     it('should view bid history without authentication (IDOR vulnerability)', async () => {

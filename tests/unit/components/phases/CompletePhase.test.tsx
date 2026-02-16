@@ -57,7 +57,7 @@ describe('CompletePhase', () => {
     );
 
     expect(screen.getByText('Transaction Complete')).toBeInTheDocument();
-    expect(screen.getByText(/✓ Completed/)).toBeInTheDocument();
+    expect(screen.getByText('Completed')).toBeInTheDocument();
     expect(screen.getByText(/Final Amount:/)).toBeInTheDocument();
     expect(screen.getByText(/Completed On:/)).toBeInTheDocument();
   });

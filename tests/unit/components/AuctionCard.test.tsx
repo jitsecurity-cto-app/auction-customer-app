@@ -33,9 +33,9 @@ describe('AuctionCard', () => {
     expect(screen.getByText('$150.00')).toBeInTheDocument();
   });
 
-  it('should render starting price', () => {
+  it('should render Current Bid label', () => {
     render(<AuctionCard auction={mockAuction} />);
-    expect(screen.getByText(/Starting: \$100.00/)).toBeInTheDocument();
+    expect(screen.getByText('Current Bid')).toBeInTheDocument();
   });
 
   it('should render status', () => {

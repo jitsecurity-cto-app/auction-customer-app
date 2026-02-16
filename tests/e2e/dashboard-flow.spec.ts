@@ -61,7 +61,7 @@ describe('Dashboard Navigation E2E', () => {
 
   describe('Dashboard API Endpoints', () => {
     it('should get all auctions for dashboard', async () => {
-      const response = await fetch(`${API_URL}/auctions/workflow/active`, {
+      const response = await fetch(`${API_URL}/auctions/workflow?workflow_state=active`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -78,7 +78,7 @@ describe('Dashboard Navigation E2E', () => {
       const states = ['active', 'pending_sale', 'shipping', 'complete'];
       
       for (const state of states) {
-        const response = await fetch(`${API_URL}/auctions/workflow/${state}`, {
+        const response = await fetch(`${API_URL}/auctions/workflow?workflow_state=${state}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -93,7 +93,7 @@ describe('Dashboard Navigation E2E', () => {
     });
 
     it('should filter by role (seller)', async () => {
-      const response = await fetch(`${API_URL}/auctions/workflow/active?role=seller`, {
+      const response = await fetch(`${API_URL}/auctions/workflow?workflow_state=active&role=seller`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -107,7 +107,7 @@ describe('Dashboard Navigation E2E', () => {
     });
 
     it('should filter by role (buyer)', async () => {
-      const response = await fetch(`${API_URL}/auctions/workflow/active?role=buyer`, {
+      const response = await fetch(`${API_URL}/auctions/workflow?workflow_state=active&role=buyer`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -121,7 +121,7 @@ describe('Dashboard Navigation E2E', () => {
     });
 
     it('should combine workflow state and role filters', async () => {
-      const response = await fetch(`${API_URL}/auctions/workflow/active?role=seller`, {
+      const response = await fetch(`${API_URL}/auctions/workflow?workflow_state=active&role=seller`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -137,7 +137,7 @@ describe('Dashboard Navigation E2E', () => {
 
   describe('Workflow State Management', () => {
     it('should update workflow state via API', async () => {
-      const response = await fetch(`${API_URL}/auctions/${auctionId}/workflow-state`, {
+      const response = await fetch(`${API_URL}/auctions/${auctionId}/workflow`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

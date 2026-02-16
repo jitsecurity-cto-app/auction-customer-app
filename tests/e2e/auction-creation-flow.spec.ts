@@ -70,7 +70,7 @@ describe('Auction Creation Flow E2E', () => {
       expect(data).toHaveProperty('id');
       expect(data.title).toBe(auctionData.title);
       expect(data.description).toBe(auctionData.description);
-      expect(data.starting_price).toBe(auctionData.starting_price);
+      expect(parseFloat(data.starting_price)).toBe(auctionData.starting_price);
       expect(data.created_by).toBe(userId);
       expect(data.status).toBe('active');
     });
@@ -233,7 +233,7 @@ describe('Auction Creation Flow E2E', () => {
       const auctionId = createdAuction.id;
 
       // Verify it appears in dashboard (workflow endpoint)
-      const dashboardResponse = await fetch(`${API_URL}/auctions/workflow/active?role=seller`, {
+      const dashboardResponse = await fetch(`${API_URL}/auctions/workflow?workflow_state=active&role=seller`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

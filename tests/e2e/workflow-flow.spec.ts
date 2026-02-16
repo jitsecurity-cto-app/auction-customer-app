@@ -157,7 +157,7 @@ describe('Complete Workflow E2E', () => {
       expect(shippedResponse.ok).toBe(true);
 
       // Update workflow state to shipping
-      const workflowShippingResponse = await fetch(`${API_URL}/auctions/${auctionId}/workflow-state`, {
+      const workflowShippingResponse = await fetch(`${API_URL}/auctions/${auctionId}/workflow`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -195,7 +195,7 @@ describe('Complete Workflow E2E', () => {
       expect(completeOrderResponse.ok).toBe(true);
 
       // Update workflow state to complete
-      const workflowCompleteResponse = await fetch(`${API_URL}/auctions/${auctionId}/workflow-state`, {
+      const workflowCompleteResponse = await fetch(`${API_URL}/auctions/${auctionId}/workflow`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -222,7 +222,7 @@ describe('Complete Workflow E2E', () => {
   describe('Dashboard Workflow Filtering', () => {
     it('should filter auctions by workflow state', async () => {
       // Get active auctions
-      const activeResponse = await fetch(`${API_URL}/auctions/workflow/active?role=seller`, {
+      const activeResponse = await fetch(`${API_URL}/auctions/workflow?workflow_state=active&role=seller`, {
         headers: {
           Authorization: `Bearer ${sellerToken}`,
         },
@@ -233,7 +233,7 @@ describe('Complete Workflow E2E', () => {
       expect(Array.isArray(activeAuctions)).toBe(true);
 
       // Get complete auctions
-      const completeResponse = await fetch(`${API_URL}/auctions/workflow/complete?role=seller`, {
+      const completeResponse = await fetch(`${API_URL}/auctions/workflow?workflow_state=complete&role=seller`, {
         headers: {
           Authorization: `Bearer ${sellerToken}`,
         },
@@ -245,7 +245,7 @@ describe('Complete Workflow E2E', () => {
     });
 
     it('should filter auctions by role (seller)', async () => {
-      const response = await fetch(`${API_URL}/auctions/workflow/active?role=seller`, {
+      const response = await fetch(`${API_URL}/auctions/workflow?workflow_state=active&role=seller`, {
         headers: {
           Authorization: `Bearer ${sellerToken}`,
         },
@@ -257,7 +257,7 @@ describe('Complete Workflow E2E', () => {
     });
 
     it('should filter auctions by role (buyer)', async () => {
-      const response = await fetch(`${API_URL}/auctions/workflow/active?role=buyer`, {
+      const response = await fetch(`${API_URL}/auctions/workflow?workflow_state=active&role=buyer`, {
         headers: {
           Authorization: `Bearer ${buyerToken}`,
         },

@@ -12,10 +12,9 @@ jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
 }));
 
-// Helper to find the bid amount input (label and input are siblings, not connected by for/id)
+// Helper to find the bid amount input (no label in new Tailwind design)
 function getBidAmountInput() {
-  const label = screen.getByText('Bid Amount');
-  const input = label.parentElement?.querySelector('input');
+  const input = screen.getByPlaceholderText(/\d+\.\d{2}/);
   if (!input) throw new Error('Could not find bid amount input');
   return input as HTMLInputElement;
 }
@@ -48,8 +47,8 @@ describe('BidForm', () => {
     render(<BidForm auctionId="1" currentBid={100} />);
 
     expect(screen.getByText('Place a Bid')).toBeInTheDocument();
-    expect(screen.getByText('Bid Amount')).toBeInTheDocument();
-    expect(screen.getByText(/Current bid: \$100.00/)).toBeInTheDocument();
+    expect(screen.getByText('Current bid')).toBeInTheDocument();
+    expect(screen.getByText('$100.00')).toBeInTheDocument();
   });
 
   it('should place bid successfully', async () => {
