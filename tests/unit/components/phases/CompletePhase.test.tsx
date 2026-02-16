@@ -9,6 +9,16 @@ import { api } from '@/lib/api';
 
 jest.mock('@/lib/api');
 
+// Helper to find input/textarea by label text (label and input are siblings, not connected by for/id)
+function getInputByLabel(labelText: string | RegExp): HTMLInputElement | HTMLTextAreaElement {
+  const labels = screen.getAllByText(labelText);
+  for (const label of labels) {
+    const input = label.parentElement?.querySelector('input, textarea');
+    if (input) return input as HTMLInputElement | HTMLTextAreaElement;
+  }
+  throw new Error(`Could not find input for label: ${labelText}`);
+}
+
 describe('CompletePhase', () => {
   const mockAuction = {
     id: '1',
@@ -65,7 +75,7 @@ describe('CompletePhase', () => {
 
     expect(screen.getByText('File a Dispute')).toBeInTheDocument();
     expect(screen.getByText(/If you have any issues with this transaction/)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Dispute Reason/i)).toBeInTheDocument();
+    expect(screen.getByText('Dispute Reason')).toBeInTheDocument();
     expect(screen.getByText('File Dispute')).toBeInTheDocument();
   });
 
@@ -82,7 +92,7 @@ describe('CompletePhase', () => {
       />
     );
 
-    const reasonInput = screen.getByLabelText(/Dispute Reason/i);
+    const reasonInput = getInputByLabel('Dispute Reason');
     fireEvent.change(reasonInput, { target: { value: 'Item not as described' } });
 
     const fileButton = screen.getByText('File Dispute');
@@ -114,7 +124,7 @@ describe('CompletePhase', () => {
       />
     );
 
-    const reasonInput = screen.getByLabelText(/Dispute Reason/i);
+    const reasonInput = getInputByLabel('Dispute Reason');
     fireEvent.change(reasonInput, { target: { value: 'Payment issue' } });
 
     const fileButton = screen.getByText('File Dispute');
@@ -157,7 +167,7 @@ describe('CompletePhase', () => {
       />
     );
 
-    const reasonInput = screen.getByLabelText(/Dispute Reason/i);
+    const reasonInput = getInputByLabel('Dispute Reason');
     fireEvent.change(reasonInput, { target: { value: 'Test reason' } });
 
     const fileButton = screen.getByText('File Dispute');
@@ -183,7 +193,7 @@ describe('CompletePhase', () => {
       />
     );
 
-    const reasonInput = screen.getByLabelText(/Dispute Reason/i);
+    const reasonInput = getInputByLabel('Dispute Reason');
     fireEvent.change(reasonInput, { target: { value: 'Test reason' } });
 
     const fileButton = screen.getByText('File Dispute');
@@ -195,7 +205,7 @@ describe('CompletePhase', () => {
   });
 
   it('should handle 404 error gracefully (endpoint not available)', async () => {
-    const error = new Error('Not Found');
+    const error = new Error('HTTP 404: Not Found');
     (error as any).response = { status: 404 };
     (api.createDispute as jest.Mock).mockRejectedValue(error);
 
@@ -209,7 +219,7 @@ describe('CompletePhase', () => {
       />
     );
 
-    const reasonInput = screen.getByLabelText(/Dispute Reason/i);
+    const reasonInput = getInputByLabel('Dispute Reason');
     fireEvent.change(reasonInput, { target: { value: 'Test reason' } });
 
     const fileButton = screen.getByText('File Dispute');
@@ -233,7 +243,7 @@ describe('CompletePhase', () => {
       />
     );
 
-    const reasonInput = screen.getByLabelText(/Dispute Reason/i) as HTMLTextAreaElement;
+    const reasonInput = getInputByLabel('Dispute Reason') as HTMLTextAreaElement;
     fireEvent.change(reasonInput, { target: { value: 'Test reason' } });
     expect(reasonInput.value).toBe('Test reason');
 

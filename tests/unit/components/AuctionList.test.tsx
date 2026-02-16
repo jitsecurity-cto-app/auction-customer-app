@@ -6,7 +6,7 @@ import { Auction } from '../../../src/types';
 // Mock the API
 jest.mock('../../../src/lib/api', () => ({
   api: {
-    get: jest.fn(),
+    getAuctions: jest.fn(),
   },
 }));
 
@@ -24,7 +24,7 @@ describe('AuctionList', () => {
   });
 
   it('should display loading state initially', () => {
-    (api.get as jest.Mock).mockImplementation(() => new Promise(() => {})); // Never resolves
+    (api.getAuctions as jest.Mock).mockImplementation(() => new Promise(() => {})); // Never resolves
     render(<AuctionList />);
     expect(screen.getByText('Loading auctions...')).toBeInTheDocument();
   });
@@ -55,7 +55,7 @@ describe('AuctionList', () => {
       },
     ];
 
-    (api.get as jest.Mock).mockResolvedValue(mockAuctions);
+    (api.getAuctions as jest.Mock).mockResolvedValue(mockAuctions);
 
     render(<AuctionList />);
 
@@ -67,7 +67,7 @@ describe('AuctionList', () => {
 
   it('should display error message on API failure', async () => {
     const errorMessage = 'Failed to fetch auctions';
-    (api.get as jest.Mock).mockRejectedValue(new Error(errorMessage));
+    (api.getAuctions as jest.Mock).mockRejectedValue(new Error(errorMessage));
 
     render(<AuctionList />);
 
@@ -77,7 +77,7 @@ describe('AuctionList', () => {
   });
 
   it('should display no auctions message when empty', async () => {
-    (api.get as jest.Mock).mockResolvedValue([]);
+    (api.getAuctions as jest.Mock).mockResolvedValue([]);
 
     render(<AuctionList />);
 
@@ -87,27 +87,26 @@ describe('AuctionList', () => {
   });
 
   it('should filter by status when provided', async () => {
-    (api.get as jest.Mock).mockResolvedValue([]);
+    (api.getAuctions as jest.Mock).mockResolvedValue([]);
 
     render(<AuctionList status="active" />);
 
     await waitFor(() => {
-      expect(api.get).toHaveBeenCalledWith(
-        expect.stringContaining('status=active')
+      expect(api.getAuctions).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 'active' })
       );
     });
   });
 
   it('should use limit parameter', async () => {
-    (api.get as jest.Mock).mockResolvedValue([]);
+    (api.getAuctions as jest.Mock).mockResolvedValue([]);
 
     render(<AuctionList limit={10} />);
 
     await waitFor(() => {
-      expect(api.get).toHaveBeenCalledWith(
-        expect.stringContaining('limit=10')
+      expect(api.getAuctions).toHaveBeenCalledWith(
+        expect.objectContaining({ limit: 10 })
       );
     });
   });
 });
-

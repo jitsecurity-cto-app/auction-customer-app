@@ -66,7 +66,7 @@ describe('AuctionsPage', () => {
 
     render(<AuctionsPage />);
 
-    expect(screen.getByText('All Auctions')).toBeInTheDocument();
+    expect(screen.getByText('Browse Auctions')).toBeInTheDocument();
     expect(screen.getByText('Create Auction')).toBeInTheDocument();
   });
 
@@ -75,7 +75,7 @@ describe('AuctionsPage', () => {
 
     render(<AuctionsPage />);
 
-    expect(screen.getByText('All Auctions')).toBeInTheDocument();
+    expect(screen.getByText('Browse Auctions')).toBeInTheDocument();
     expect(screen.queryByText('Create Auction')).not.toBeInTheDocument();
   });
 

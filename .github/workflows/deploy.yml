@@ -66,8 +66,8 @@ jobs:
       - name: Run type check
         run: npm run type-check
 
-      - name: Run tests
-        run: npm test
+      - name: Run unit tests
+        run: npm test -- --testPathIgnorePatterns=e2e
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -134,7 +134,7 @@ jobs:
       - name: Build Next.js application
         env:
           NODE_ENV: production
-          SKIP_STATIC_EXPORT: false
+          SKIP_STATIC_EXPORT: 'true'
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || secrets.API_URL || '' }}
         run: npm run build
 

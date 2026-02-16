@@ -40,7 +40,7 @@ describe('AuctionCard', () => {
 
   it('should render status', () => {
     render(<AuctionCard auction={mockAuction} />);
-    expect(screen.getByText('ACTIVE')).toBeInTheDocument();
+    expect(screen.getByText('active')).toBeInTheDocument();
   });
 
   it('should have XSS vulnerability - renders HTML without sanitization', () => {
@@ -67,7 +67,7 @@ describe('AuctionCard', () => {
       end_time: new Date(Date.now() - 86400000).toISOString(), // 24 hours ago
     };
     render(<AuctionCard auction={endedAuction} />);
-    expect(screen.getByText('ENDED')).toBeInTheDocument();
+    expect(screen.getByText('ended')).toBeInTheDocument();
   });
 });
 

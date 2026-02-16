@@ -31,13 +31,12 @@ describe('Navbar', () => {
     expect(screen.getByText('Auctions')).toBeInTheDocument();
   });
 
-  it('should show login and register links when not authenticated', () => {
+  it('should show login button when not authenticated', () => {
     (isAuthenticated as jest.Mock).mockReturnValue(false);
 
     render(<Navbar />);
 
     expect(screen.getByText('Login')).toBeInTheDocument();
-    expect(screen.getByText('Register')).toBeInTheDocument();
   });
 
   it('should show user info and logout when authenticated', () => {

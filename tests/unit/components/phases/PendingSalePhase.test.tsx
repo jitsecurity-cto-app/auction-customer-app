@@ -9,6 +9,16 @@ import { api } from '@/lib/api';
 
 jest.mock('@/lib/api');
 
+// Helper to find input/textarea by label text (label and input are siblings, not connected by for/id)
+function getInputByLabel(labelText: string | RegExp): HTMLInputElement | HTMLTextAreaElement {
+  const labels = screen.getAllByText(labelText);
+  for (const label of labels) {
+    const input = label.parentElement?.querySelector('input, textarea');
+    if (input) return input as HTMLInputElement | HTMLTextAreaElement;
+  }
+  throw new Error(`Could not find input for label: ${labelText}`);
+}
+
 describe('PendingSalePhase', () => {
   const mockAuction = {
     id: '1',
@@ -48,12 +58,12 @@ describe('PendingSalePhase', () => {
         />
       );
 
-      expect(screen.getByText('Complete Your Purchase')).toBeInTheDocument();
+      expect(screen.getByText(/Complete Your Purchase/)).toBeInTheDocument();
       expect(screen.getByText('Order Summary')).toBeInTheDocument();
       expect(screen.getByText('Test Auction')).toBeInTheDocument();
       expect(screen.getByText(/Winning Bid:/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/Shipping Address/i)).toBeInTheDocument();
-      expect(screen.getByText('Complete Purchase')).toBeInTheDocument();
+      expect(screen.getByText('Shipping Address')).toBeInTheDocument();
+      expect(screen.getByText(/Complete Purchase/)).toBeInTheDocument();
     });
 
     it('should create order when form is submitted', async () => {
@@ -69,10 +79,10 @@ describe('PendingSalePhase', () => {
         />
       );
 
-      const addressInput = screen.getByLabelText(/Shipping Address/i);
+      const addressInput = getInputByLabel('Shipping Address');
       fireEvent.change(addressInput, { target: { value: '123 Test St' } });
 
-      const submitButton = screen.getByText('Complete Purchase');
+      const submitButton = screen.getByText(/Complete Purchase/);
       fireEvent.click(submitButton);
 
       await waitFor(() => {
@@ -95,7 +105,7 @@ describe('PendingSalePhase', () => {
         />
       );
 
-      const submitButton = screen.getByText('Complete Purchase');
+      const submitButton = screen.getByText(/Complete Purchase/);
       expect(submitButton).toBeDisabled();
     });
 
@@ -113,10 +123,10 @@ describe('PendingSalePhase', () => {
         />
       );
 
-      const addressInput = screen.getByLabelText(/Shipping Address/i);
+      const addressInput = getInputByLabel('Shipping Address');
       fireEvent.change(addressInput, { target: { value: '123 Test St' } });
 
-      const submitButton = screen.getByText('Complete Purchase');
+      const submitButton = screen.getByText(/Complete Purchase/);
       fireEvent.click(submitButton);
 
       await waitFor(() => {
@@ -159,8 +169,8 @@ describe('PendingSalePhase', () => {
       expect(screen.getByText('Prepare for Shipping')).toBeInTheDocument();
       expect(screen.getByText(/Buyer:/)).toBeInTheDocument();
       expect(screen.getByText(/Shipping Address:/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/Tracking Number/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/Tracking URL/i)).toBeInTheDocument();
+      expect(screen.getByText('Tracking Number')).toBeInTheDocument();
+      expect(screen.getByText(/Tracking URL/)).toBeInTheDocument();
       expect(screen.getByText('Mark as Shipped')).toBeInTheDocument();
     });
 
@@ -178,7 +188,7 @@ describe('PendingSalePhase', () => {
         />
       );
 
-      const trackingInput = screen.getByLabelText(/Tracking Number/i);
+      const trackingInput = getInputByLabel('Tracking Number');
       fireEvent.change(trackingInput, { target: { value: 'TRACK123' } });
 
       const markShippedButton = screen.getByText('Mark as Shipped');
@@ -209,7 +219,7 @@ describe('PendingSalePhase', () => {
         />
       );
 
-      const trackingUrlInput = screen.getByLabelText(/Tracking URL/i);
+      const trackingUrlInput = getInputByLabel(/Tracking URL/);
       fireEvent.change(trackingUrlInput, { target: { value: 'https://track.example.com/123' } });
 
       const markShippedButton = screen.getByText('Mark as Shipped');
@@ -251,7 +261,7 @@ describe('PendingSalePhase', () => {
         />
       );
 
-      const trackingInput = screen.getByLabelText(/Tracking Number/i);
+      const trackingInput = getInputByLabel('Tracking Number');
       fireEvent.change(trackingInput, { target: { value: 'TRACK123' } });
 
       const markShippedButton = screen.getByText('Mark as Shipped');

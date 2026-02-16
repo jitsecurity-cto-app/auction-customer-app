@@ -10,10 +10,13 @@ import { getAuthUser, isAuthenticated } from '@/lib/auth';
 
 jest.mock('@/lib/api');
 jest.mock('@/lib/auth');
+
+const mockPush = jest.fn();
+const mockReplace = jest.fn();
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
-    push: jest.fn(),
-    replace: jest.fn(),
+    push: mockPush,
+    replace: mockReplace,
   }),
   useSearchParams: () => ({
     get: jest.fn((key: string) => {
@@ -97,6 +100,8 @@ describe('Dashboard Page', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockPush.mockClear();
+    mockReplace.mockClear();
     (isAuthenticated as jest.Mock).mockReturnValue(true);
     (getAuthUser as jest.Mock).mockReturnValue(mockUser);
     (api.getAuctionsByWorkflow as jest.Mock).mockResolvedValue(mockAuctions);
@@ -211,20 +216,16 @@ describe('Dashboard Page', () => {
     });
   });
 
-  it('should redirect to login when not authenticated', () => {
-    const mockPush = jest.fn();
+  it('should redirect to login when not authenticated', async () => {
     (isAuthenticated as jest.Mock).mockReturnValue(false);
     (getAuthUser as jest.Mock).mockReturnValue(null);
-    
-    jest.doMock('next/navigation', () => ({
-      useRouter: () => ({ push: mockPush }),
-      useSearchParams: () => ({ get: jest.fn() }),
-    }));
 
     render(<DashboardPage />);
-    
-    // Component should attempt to redirect
-    expect(mockPush).toHaveBeenCalledWith('/login');
+
+    // Component should attempt to redirect via useEffect
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith('/login');
+    });
   });
 
   it('should update workflow state when action button is clicked', async () => {
@@ -253,7 +254,8 @@ describe('Dashboard Page', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Shipped Auction')).toBeInTheDocument();
-      expect(screen.getByText(/Order Status:/)).toBeInTheDocument();
+      // Multiple auctions may have order status displayed
+      expect(screen.getAllByText(/Order Status:/).length).toBeGreaterThanOrEqual(1);
     });
   });
 });

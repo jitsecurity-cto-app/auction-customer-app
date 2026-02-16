@@ -122,7 +122,7 @@ describe('AuctionDetail', () => {
     render(<AuctionDetail auctionId="1" />);
 
     await waitFor(() => {
-      expect(screen.getByText(`Error: ${errorMessage}`)).toBeInTheDocument();
+      expect(screen.getByText(errorMessage)).toBeInTheDocument();
     });
   });
 

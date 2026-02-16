@@ -12,6 +12,14 @@ jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
 }));
 
+// Helper to find the bid amount input (label and input are siblings, not connected by for/id)
+function getBidAmountInput() {
+  const label = screen.getByText('Bid Amount');
+  const input = label.parentElement?.querySelector('input');
+  if (!input) throw new Error('Could not find bid amount input');
+  return input as HTMLInputElement;
+}
+
 describe('BidForm', () => {
   const mockPush = jest.fn();
   const mockOnBidPlaced = jest.fn();
@@ -40,7 +48,7 @@ describe('BidForm', () => {
     render(<BidForm auctionId="1" currentBid={100} />);
 
     expect(screen.getByText('Place a Bid')).toBeInTheDocument();
-    expect(screen.getByLabelText('Bid Amount')).toBeInTheDocument();
+    expect(screen.getByText('Bid Amount')).toBeInTheDocument();
     expect(screen.getByText(/Current bid: \$100.00/)).toBeInTheDocument();
   });
 
@@ -50,7 +58,7 @@ describe('BidForm', () => {
 
     render(<BidForm auctionId="1" currentBid={100} onBidPlaced={mockOnBidPlaced} />);
 
-    const input = screen.getByLabelText('Bid Amount');
+    const input = getBidAmountInput();
     const submitButton = screen.getByRole('button', { name: /Place Bid/i });
 
     await userEvent.type(input, '150');
@@ -70,7 +78,7 @@ describe('BidForm', () => {
 
     render(<BidForm auctionId="1" currentBid={100} />);
 
-    const input = screen.getByLabelText('Bid Amount');
+    const input = getBidAmountInput();
     const submitButton = screen.getByRole('button', { name: /Place Bid/i });
 
     await userEvent.type(input, '50'); // Less than current bid
@@ -86,7 +94,7 @@ describe('BidForm', () => {
 
     render(<BidForm auctionId="1" currentBid={100} />);
 
-    const input = screen.getByLabelText('Bid Amount');
+    const input = getBidAmountInput();
     const submitButton = screen.getByRole('button', { name: /Place Bid/i });
 
     await userEvent.type(input, 'abc');
@@ -104,7 +112,7 @@ describe('BidForm', () => {
 
     render(<BidForm auctionId="1" currentBid={100} />);
 
-    const input = screen.getByLabelText('Bid Amount');
+    const input = getBidAmountInput();
     const submitButton = screen.getByRole('button', { name: /Place Bid/i });
 
     await userEvent.type(input, '150');
@@ -123,11 +131,10 @@ describe('BidForm', () => {
 
     render(<BidForm auctionId="1" currentBid={100} />);
 
-    const input = screen.getByLabelText('Bid Amount') as HTMLInputElement;
-    
+    const input = getBidAmountInput();
+
     // Test that input accepts any format (no validation)
     await userEvent.type(input, '150.999999');
     expect(input.value).toBe('150.999999');
   });
 });
-

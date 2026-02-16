@@ -88,10 +88,14 @@ describe('API Client', () => {
         ok: false,
         status: 401,
         statusText: 'Unauthorized',
+        headers: {
+          get: (name: string) => name === 'content-type' ? 'application/json' : null,
+        },
         json: async () => errorResponse,
       });
 
-      await expect(apiRequest('/protected')).rejects.toThrow('Invalid token');
+      // "Invalid token" triggers session expiry handling, which clears token and throws a different message
+      await expect(apiRequest('/protected')).rejects.toThrow('Your session has expired. Please log in again.');
     });
 
     it('handles network errors', async () => {
@@ -111,6 +115,9 @@ describe('API Client', () => {
         ok: false,
         status: 500,
         statusText: 'Internal Server Error',
+        headers: {
+          get: (name: string) => name === 'content-type' ? 'application/json' : null,
+        },
         json: async () => errorResponse,
       });
 
