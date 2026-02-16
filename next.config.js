@@ -6,6 +6,8 @@ const nextConfig = {
   // For static export to S3 (required for S3 deployment)
   // Disable static export in development to allow dynamic routes
   ...(process.env.SKIP_STATIC_EXPORT !== 'true' && { output: 'export' }),
+  // Generate /page/index.html instead of /page.html for S3 website hosting
+  trailingSlash: true,
   images: {
     unoptimized: true,
   },
