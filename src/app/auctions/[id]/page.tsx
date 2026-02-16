@@ -1,22 +1,16 @@
 import AuctionDetail from '../../../components/AuctionDetail';
 
-interface AuctionDetailPageProps {
-  params: Promise<{
-    id: string;
-  }>;
+// Required for static export with dynamic routes
+// Returns a placeholder param to satisfy Next.js build requirement
+// Actual routes are handled client-side
+export async function generateStaticParams() {
+  return [{ id: 'placeholder' }];
 }
 
-// Required for static export - returns empty array to allow dynamic client-side routing
-export function generateStaticParams() {
-  return [];
-}
-
-export default async function AuctionDetailPage({ params }: AuctionDetailPageProps) {
-  const { id } = await params;
-  
+export default function AuctionDetailPage({ params }: { params: { id: string } }) {
   return (
     <main>
-      <AuctionDetail auctionId={id} />
+      <AuctionDetail auctionId={params.id} />
     </main>
   );
 }
