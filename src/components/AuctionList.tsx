@@ -30,19 +30,45 @@ export default function AuctionList({
         setLoading(true);
         setError(null);
 
+        // For "active" and "ended" filters, we need client-side filtering
+        // because the backend only checks the database status column.
+        // Auctions that expired by time but weren't formally closed still
+        // have status='active' in the database, so we fetch all and filter.
+        const needsClientSideFilter = status === 'active' || status === 'ended';
+
         // Use API client method with search and price filters
         // No input validation (intentional vulnerability)
         const response = await api.getAuctions({
-          status,
+          status: needsClientSideFilter ? undefined : status,
           search,
           minPrice,
           maxPrice,
-          limit,
+          limit: needsClientSideFilter ? undefined : limit,
         });
 
         // Handle both wrapped and unwrapped responses
         const data = Array.isArray(response) ? response : (response as any)?.data || [];
-        setAuctions(Array.isArray(data) ? data : []);
+        let auctionData: Auction[] = Array.isArray(data) ? data : [];
+
+        // Client-side filtering for time-based status
+        if (status === 'ended') {
+          const now = new Date();
+          auctionData = auctionData.filter(
+            (auction) => auction.status === 'ended' || new Date(auction.end_time) < now
+          );
+        } else if (status === 'active') {
+          const now = new Date();
+          auctionData = auctionData.filter(
+            (auction) => auction.status === 'active' && new Date(auction.end_time) > now
+          );
+        }
+
+        // Apply limit after client-side filtering
+        if (needsClientSideFilter && limit) {
+          auctionData = auctionData.slice(0, limit);
+        }
+
+        setAuctions(auctionData);
       } catch (err) {
         // Intentionally verbose error messages (security vulnerability)
         const errorMessage = err instanceof Error

@@ -86,14 +86,120 @@ describe('AuctionList', () => {
     });
   });
 
-  it('should filter by status when provided', async () => {
-    (api.getAuctions as jest.Mock).mockResolvedValue([]);
+  it('should fetch all auctions and filter client-side for active status', async () => {
+    const futureDate = new Date(Date.now() + 86400000).toISOString(); // 1 day from now
+    const pastDate = new Date(Date.now() - 86400000).toISOString(); // 1 day ago
+
+    const mockAuctions: Auction[] = [
+      {
+        id: '1',
+        title: 'Active Auction',
+        description: 'Still running',
+        starting_price: 100,
+        current_bid: 150,
+        end_time: futureDate,
+        status: 'active',
+        created_by: 'user1',
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: '2',
+        title: 'Expired Auction',
+        description: 'Time passed but status still active',
+        starting_price: 200,
+        current_bid: 250,
+        end_time: pastDate,
+        status: 'active',
+        created_by: 'user2',
+        created_at: new Date().toISOString(),
+      },
+    ];
+
+    (api.getAuctions as jest.Mock).mockResolvedValue(mockAuctions);
 
     render(<AuctionList status="active" />);
 
     await waitFor(() => {
+      // Should fetch all auctions (no status sent to API) for client-side filtering
       expect(api.getAuctions).toHaveBeenCalledWith(
-        expect.objectContaining({ status: 'active' })
+        expect.objectContaining({ status: undefined })
+      );
+    });
+
+    // Only the truly active auction (with future end_time) should be shown
+    await waitFor(() => {
+      expect(screen.getByText('Active Auction')).toBeInTheDocument();
+      expect(screen.queryByText('Expired Auction')).not.toBeInTheDocument();
+    });
+  });
+
+  it('should fetch all auctions and filter client-side for ended status', async () => {
+    const futureDate = new Date(Date.now() + 86400000).toISOString();
+    const pastDate = new Date(Date.now() - 86400000).toISOString();
+
+    const mockAuctions: Auction[] = [
+      {
+        id: '1',
+        title: 'Active Auction',
+        description: 'Still running',
+        starting_price: 100,
+        current_bid: 150,
+        end_time: futureDate,
+        status: 'active',
+        created_by: 'user1',
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: '2',
+        title: 'Time-Expired Auction',
+        description: 'Time passed but status still active in DB',
+        starting_price: 200,
+        current_bid: 250,
+        end_time: pastDate,
+        status: 'active',
+        created_by: 'user2',
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: '3',
+        title: 'Formally Ended Auction',
+        description: 'Status is ended in DB',
+        starting_price: 300,
+        current_bid: 350,
+        end_time: pastDate,
+        status: 'ended',
+        created_by: 'user3',
+        created_at: new Date().toISOString(),
+      },
+    ];
+
+    (api.getAuctions as jest.Mock).mockResolvedValue(mockAuctions);
+
+    render(<AuctionList status="ended" />);
+
+    await waitFor(() => {
+      // Should fetch all auctions (no status sent to API) for client-side filtering
+      expect(api.getAuctions).toHaveBeenCalledWith(
+        expect.objectContaining({ status: undefined })
+      );
+    });
+
+    // Both time-expired and formally ended auctions should be shown
+    await waitFor(() => {
+      expect(screen.queryByText('Active Auction')).not.toBeInTheDocument();
+      expect(screen.getByText('Time-Expired Auction')).toBeInTheDocument();
+      expect(screen.getByText('Formally Ended Auction')).toBeInTheDocument();
+    });
+  });
+
+  it('should pass cancelled status directly to API', async () => {
+    (api.getAuctions as jest.Mock).mockResolvedValue([]);
+
+    render(<AuctionList status="cancelled" />);
+
+    await waitFor(() => {
+      expect(api.getAuctions).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 'cancelled' })
       );
     });
   });
