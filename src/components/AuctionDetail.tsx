@@ -12,6 +12,7 @@ import PendingSalePhase from './phases/PendingSalePhase';
 import ShippedPhase from './phases/ShippedPhase';
 import CompletePhase from './phases/CompletePhase';
 import BidHistory from './BidHistory';
+import ImageGallery from './ImageGallery';
 
 interface AuctionDetailProps {
   auctionId: string;
@@ -293,6 +294,12 @@ export default function AuctionDetail({ auctionId }: AuctionDetailProps) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Description + Bid History */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Image Gallery */}
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">Photos</h2>
+              <ImageGallery auctionId={auctionId} editable={!!isSeller} />
+            </div>
+
             {/* Description */}
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
               <h2 className="text-lg font-semibold text-slate-900 mb-4">Description</h2>
@@ -306,7 +313,15 @@ export default function AuctionDetail({ auctionId }: AuctionDetailProps) {
             {/* Bid History */}
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
               <h2 className="text-lg font-semibold text-slate-900 mb-4">Bid History</h2>
-              <BidHistory auctionId={auctionId} />
+              <BidHistory
+                auctionId={auctionId}
+                onNewBid={(bid) => {
+                  // Update the displayed current bid in real-time
+                  if (bid.amount && auction) {
+                    setAuction({ ...auction, current_bid: bid.amount });
+                  }
+                }}
+              />
             </div>
           </div>
 

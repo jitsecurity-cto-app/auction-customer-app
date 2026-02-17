@@ -5,11 +5,15 @@ import { useRouter } from 'next/navigation';
 import { api } from '../../../lib/api';
 import { isAuthenticated } from '../../../lib/auth';
 import Link from 'next/link';
+import ImageUpload, { AuctionImage } from '../../../components/ImageUpload';
+import ImageGallery from '../../../components/ImageGallery';
 
 export default function CreateAuctionPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [createdAuctionId, setCreatedAuctionId] = useState<string | null>(null);
+  const [uploadedImages, setUploadedImages] = useState<AuctionImage[]>([]);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -68,10 +72,9 @@ export default function CreateAuctionPage() {
 
       const result = await api.createAuction(auctionData);
 
-      // API returns auction directly
-      // Redirect to the new auction page
+      // Show image upload step before redirecting
       if (result && result.id) {
-        router.push(`/auctions/${result.id}`);
+        setCreatedAuctionId(result.id);
       } else {
         router.push('/auctions');
       }
@@ -86,6 +89,49 @@ export default function CreateAuctionPage() {
       setLoading(false);
     }
   };
+
+  // Image upload step after auction creation
+  if (createdAuctionId) {
+    return (
+      <main className="min-h-screen">
+        <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold text-slate-900">Add Photos</h1>
+            <p className="text-sm text-slate-500 mt-1">Upload images to make your auction more appealing.</p>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div className="h-2 bg-gradient-to-r from-primary-500 via-primary-600 to-accent-500" />
+            <div className="p-8 space-y-6">
+              <ImageUpload
+                auctionId={createdAuctionId}
+                onImageUploaded={(image) => setUploadedImages(prev => [...prev, image])}
+                currentImageCount={uploadedImages.length}
+              />
+
+              {uploadedImages.length > 0 && (
+                <ImageGallery
+                  auctionId={createdAuctionId}
+                  images={uploadedImages}
+                  editable
+                  onImagesChange={setUploadedImages}
+                />
+              )}
+
+              <div className="flex items-center gap-3 pt-4 border-t border-slate-200">
+                <Link
+                  href={`/auctions/${createdAuctionId}`}
+                  className="flex-1 text-center bg-primary-600 hover:bg-primary-700 text-white rounded-lg px-4 py-3 font-medium transition-colors"
+                >
+                  {uploadedImages.length > 0 ? 'View Auction' : 'Skip & View Auction'}
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen">

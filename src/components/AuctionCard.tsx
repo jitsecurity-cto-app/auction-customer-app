@@ -6,7 +6,7 @@ import { Auction } from '../types';
 import { formatCurrency, formatTimeRemaining } from '@design-system/utils';
 
 interface AuctionCardProps {
-  auction: Auction & { workflow_state?: 'active' | 'pending_sale' | 'shipping' | 'complete' };
+  auction: Auction & { workflow_state?: 'active' | 'pending_sale' | 'shipping' | 'complete'; images?: Array<{ url?: string | null; thumbnail_url?: string | null; is_primary?: boolean }> };
 }
 
 export default function AuctionCard({ auction }: AuctionCardProps) {
@@ -73,11 +73,25 @@ export default function AuctionCard({ auction }: AuctionCardProps) {
     return text.substring(0, maxLength) + '...';
   };
 
+  // Get primary image or first image
+  const primaryImage = auction.images?.find(img => img.is_primary) || auction.images?.[0];
+  const imageUrl = primaryImage?.thumbnail_url || primaryImage?.url;
+
   return (
     <Link href={`/auctions/${auction.id}`} className="group block">
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-        {/* Top accent bar */}
-        <div className={`h-1 ${getAccentBarClasses()}`} />
+        {/* Image or accent bar */}
+        {imageUrl ? (
+          <div className="aspect-[16/9] bg-slate-100 overflow-hidden">
+            <img
+              src={imageUrl}
+              alt={auction.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+          </div>
+        ) : (
+          <div className={`h-1 ${getAccentBarClasses()}`} />
+        )}
         <div className="p-5">
           {/* Title + badge row */}
           <div className="flex items-start justify-between gap-3 mb-3">

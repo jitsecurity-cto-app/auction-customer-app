@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { getAuthUser, isAuthenticated, logout } from '../lib/auth';
 import Link from 'next/link';
+import NotificationBell from './NotificationBell';
 
 export default function Navbar() {
   const [authenticated, setAuthenticated] = useState(false);
@@ -75,6 +76,7 @@ export default function Navbar() {
             )}
             {mounted && authenticated && user && (
               <>
+                <NotificationBell />
                 <span className="hidden sm:inline text-sm text-slate-600">
                   {user.name || user.email}
                 </span>

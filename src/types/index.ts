@@ -34,12 +34,15 @@ export interface Auction {
   starting_price: number;
   current_bid: number;
   end_time: string;
-  status: 'active' | 'ended' | 'cancelled';
+  start_time?: string;
+  status: 'active' | 'ended' | 'cancelled' | 'scheduled';
   workflow_state?: 'active' | 'pending_sale' | 'shipping' | 'complete';
   created_by: string;
   winner_id?: string;
   closed_at?: string;
   created_at: string;
+  images?: AuctionImage[];
+  primary_image?: AuctionImage;
 }
 
 export interface Bid {
@@ -90,6 +93,68 @@ export interface ApiResponse<T = any> {
   data?: T;
   error?: string;
   message?: string;
+}
+
+export interface AuctionImage {
+  id: string;
+  auction_id: string;
+  s3_key: string;
+  original_filename: string;
+  content_type: string;
+  file_size: number;
+  sort_order: number;
+  is_primary: boolean;
+  url: string | null;
+  thumbnail_url: string | null;
+  created_at: string;
+}
+
+export interface NotificationPreferences {
+  id: string;
+  user_id: string;
+  outbid_email: boolean;
+  outbid_sms: boolean;
+  auction_end_email: boolean;
+  auction_end_sms: boolean;
+  order_update_email: boolean;
+  order_update_sms: boolean;
+  phone_number?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  type: string;
+  title: string;
+  message: string;
+  read: boolean;
+  metadata?: Record<string, any>;
+  created_at: string;
+}
+
+export interface AuditEvent {
+  id: string;
+  entity_type: string;
+  entity_id: string;
+  action: string;
+  actor_id: string;
+  actor_email?: string;
+  old_values?: Record<string, any>;
+  new_values?: Record<string, any>;
+  ip_address?: string;
+  timestamp: string;
+}
+
+export interface AnalyticsData {
+  revenue_over_time: Array<{ date: string; revenue: number }>;
+  bid_activity: Array<{ date: string; count: number }>;
+  top_auctions: Array<{ id: string; title: string; total_bids: number; final_price: number }>;
+  conversion_rate: number;
+  total_revenue: number;
+  total_auctions: number;
+  active_users: number;
 }
 
 export interface ApiError {

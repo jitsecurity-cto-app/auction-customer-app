@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
+import { useWebSocket } from '../lib/useWebSocket';
 import { Bid } from '../types';
 import { formatCurrency, formatDateTime } from '@design-system/utils';
 
 interface BidHistoryProps {
   auctionId: string;
+  onNewBid?: (bid: any) => void;
 }
 
 interface BidWithUser {
@@ -22,10 +24,11 @@ interface BidWithUser {
   };
 }
 
-export default function BidHistory({ auctionId }: BidHistoryProps) {
+export default function BidHistory({ auctionId, onNewBid }: BidHistoryProps) {
   const [bids, setBids] = useState<BidWithUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { connected, lastMessage } = useWebSocket(auctionId);
 
   useEffect(() => {
     async function fetchBids() {
@@ -48,6 +51,20 @@ export default function BidHistory({ auctionId }: BidHistoryProps) {
 
     fetchBids();
   }, [auctionId]);
+
+  // Handle real-time bid updates via WebSocket
+  useEffect(() => {
+    if (!lastMessage || lastMessage.type !== 'new_bid' || !lastMessage.bid) return;
+
+    const newBid = lastMessage.bid;
+    setBids(prev => {
+      // Avoid duplicates
+      if (prev.some(b => b.id === newBid.id)) return prev;
+      return [newBid, ...prev];
+    });
+
+    onNewBid?.(newBid);
+  }, [lastMessage, onNewBid]);
 
   if (loading) {
     return (
