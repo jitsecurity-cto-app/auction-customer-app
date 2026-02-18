@@ -120,7 +120,7 @@ function handler(event) {
   // Skip known static routes: 'new', 'placeholder', empty
   if (segments.length >= 3 && segments[1] === 'auctions') {
     var id = segments[2];
-    if (id && id !== 'new' && id !== 'placeholder' && id !== 'index.html' && id !== '') {
+    if (id && id !== 'new' && id !== 'placeholder' && id !== 'index.html' && id !== 'index.txt' && id !== '') {
       segments[2] = 'placeholder';
       request.uri = segments.join('/');
     }
