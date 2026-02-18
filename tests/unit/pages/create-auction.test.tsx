@@ -21,6 +21,22 @@ jest.mock('next/link', () => {
   };
 });
 
+// Mock image components
+jest.mock('../../../src/components/ImageUpload', () => {
+  const React = require('react');
+  return {
+    __esModule: true,
+    default: () => React.createElement('div', { 'data-testid': 'image-upload' }, 'Image Upload'),
+  };
+});
+jest.mock('../../../src/components/ImageGallery', () => {
+  const React = require('react');
+  return {
+    __esModule: true,
+    default: () => React.createElement('div', { 'data-testid': 'image-gallery' }, 'Image Gallery'),
+  };
+});
+
 const mockPush = jest.fn();
 const mockRouter = {
   push: mockPush,
@@ -100,9 +116,13 @@ describe('CreateAuctionPage', () => {
       });
     });
 
-      await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/auctions/1');
+    // After creation, the page shows an image upload step instead of redirecting
+    await waitFor(() => {
+      expect(screen.getByText('Add Photos')).toBeInTheDocument();
     }, { timeout: 3000 });
+
+    // Verify the link to view the auction is present
+    expect(screen.getByText(/View Auction/i)).toBeInTheDocument();
   });
 
   it('should accept XSS payload in description (vulnerability)', async () => {
