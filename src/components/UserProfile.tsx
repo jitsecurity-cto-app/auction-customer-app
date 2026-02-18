@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
 import { User, Bid, Auction, Dispute } from '../types';
-import { getAuthUser } from '../lib/auth';
 import Link from 'next/link';
 import { formatCurrency, formatDate, formatDateTime } from '@design-system/utils';
 
@@ -63,12 +62,7 @@ export default function UserProfile({ userId }: UserProfileProps) {
   }, [userId]);
 
   const fetchDisputes = async () => {
-    const currentUser = getAuthUser();
-    if (!currentUser || String(currentUser.id) !== String(userId)) {
-      // Only fetch disputes for the current user
-      return;
-    }
-
+    // No authorization check - IDOR vulnerability (can see any user's disputes)
     try {
       setDisputesLoading(true);
       // Fetch all disputes, then filter for those filed by the current user
@@ -373,9 +367,8 @@ export default function UserProfile({ userId }: UserProfileProps) {
         </div>
       )}
 
-      {/* Active Disputes */}
-      {String(getAuthUser()?.id) === String(userId) && (
-        <div>
+      {/* Active Disputes - No auth check, IDOR vulnerability (can see any user's disputes) */}
+      <div>
           <h2 className="text-lg font-semibold text-slate-900 mb-4">Active Disputes</h2>
           {disputesLoading ? (
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 text-center">
@@ -447,7 +440,6 @@ export default function UserProfile({ userId }: UserProfileProps) {
             </div>
           )}
         </div>
-      )}
     </div>
   );
 }
