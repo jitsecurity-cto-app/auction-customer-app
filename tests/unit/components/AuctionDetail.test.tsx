@@ -7,9 +7,14 @@ import { getAuthUser } from '../../../src/lib/auth';
 jest.mock('../../../src/lib/api');
 jest.mock('../../../src/lib/auth');
 
-const mockUsePathname = jest.fn().mockReturnValue('/auctions/1');
-jest.mock('next/navigation', () => ({
-  usePathname: () => mockUsePathname(),
+let mockResolvedId = '';
+jest.mock('../../../src/hooks/useResolvedParam', () => ({
+  useResolvedParam: (param: string) => {
+    // For 'placeholder', return the mock-controlled resolved ID
+    if (param === 'placeholder') return mockResolvedId;
+    // For normal IDs, return as-is (same as the real hook)
+    return param;
+  },
 }));
 jest.mock('../../../src/components/BidForm', () => {
   const React = require('react');
@@ -133,8 +138,8 @@ describe('AuctionDetail', () => {
 
   it('should resolve placeholder ID from URL pathname for static export', async () => {
     // Simulate static export: CloudFront rewrites /auctions/7/ to /auctions/placeholder/
-    // The component receives 'placeholder' but the browser URL is /auctions/7
-    mockUsePathname.mockReturnValue('/auctions/7');
+    // The component receives 'placeholder' but useResolvedParam reads window.location
+    mockResolvedId = '7';
 
     const mockAuction = {
       id: '7',
@@ -162,7 +167,7 @@ describe('AuctionDetail', () => {
     });
 
     // Reset mock
-    mockUsePathname.mockReturnValue('/auctions/1');
+    mockResolvedId = '';
   });
 
   it('should not validate auctionId (vulnerability)', async () => {

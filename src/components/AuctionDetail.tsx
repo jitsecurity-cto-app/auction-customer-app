@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { useResolvedParam } from '../hooks/useResolvedParam';
 import { api } from '../lib/api';
 import { Auction, Dispute } from '../types';
 import { getAuthUser } from '../lib/auth';
@@ -41,14 +41,7 @@ interface AuctionWithDetails extends Auction {
 }
 
 export default function AuctionDetail({ auctionId }: AuctionDetailProps) {
-  const pathname = usePathname();
-
-  // With static export, CloudFront rewrites /auctions/7/ to /auctions/placeholder/.
-  // The static HTML has 'placeholder' baked in as the param. Resolve the real ID
-  // from the browser URL pathname.
-  const resolvedId = auctionId === 'placeholder'
-    ? pathname.split('/').filter(Boolean)[1] || auctionId
-    : auctionId;
+  const resolvedId = useResolvedParam(auctionId);
 
   const [auction, setAuction] = useState<AuctionWithDetails | null>(null);
   const [loading, setLoading] = useState(true);
@@ -81,7 +74,9 @@ export default function AuctionDetail({ auctionId }: AuctionDetailProps) {
   }, []);
 
   useEffect(() => {
-    fetchAuction();
+    if (resolvedId) {
+      fetchAuction();
+    }
   }, [resolvedId]);
 
   const fetchDisputes = async () => {
@@ -99,7 +94,7 @@ export default function AuctionDetail({ auctionId }: AuctionDetailProps) {
   };
 
   useEffect(() => {
-    if (resolvedId) {
+    if (resolvedId && resolvedId !== 'placeholder') {
       fetchDisputes();
     }
   }, [resolvedId]);

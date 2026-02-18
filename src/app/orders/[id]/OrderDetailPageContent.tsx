@@ -8,13 +8,15 @@ import { Order } from '@/types';
 import Link from 'next/link';
 import { Button, Card, CardHeader, CardTitle, CardContent, Badge, Input } from '@design-system/components';
 import { formatCurrency } from '@design-system/utils';
+import { useResolvedParam } from '@/hooks/useResolvedParam';
 import styles from './page.module.css';
 
 interface OrderDetailPageContentProps {
   orderId: string;
 }
 
-export default function OrderDetailPageContent({ orderId }: OrderDetailPageContentProps) {
+export default function OrderDetailPageContent({ orderId: rawOrderId }: OrderDetailPageContentProps) {
+  const orderId = useResolvedParam(rawOrderId);
   const router = useRouter();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
@@ -29,7 +31,9 @@ export default function OrderDetailPageContent({ orderId }: OrderDetailPageConte
       return;
     }
 
-    fetchOrder();
+    if (orderId) {
+      fetchOrder();
+    }
   }, [orderId, router]);
 
   const fetchOrder = async () => {
