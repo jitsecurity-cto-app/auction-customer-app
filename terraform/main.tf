@@ -123,6 +123,11 @@ function handler(event) {
     if (id && id !== 'new' && id !== 'placeholder' && id !== 'index.html' && id !== 'index.txt' && id !== '') {
       segments[2] = 'placeholder';
       request.uri = segments.join('/');
+      // Ensure trailing slash to prevent S3 302 redirect exposing /placeholder/
+      var last = segments[segments.length - 1];
+      if (last !== '' && last.indexOf('.') === -1) {
+        request.uri += '/';
+      }
     }
   }
 
