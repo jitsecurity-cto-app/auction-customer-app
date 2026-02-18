@@ -64,7 +64,7 @@ export default function UserProfile({ userId }: UserProfileProps) {
 
   const fetchDisputes = async () => {
     const currentUser = getAuthUser();
-    if (!currentUser || currentUser.id !== userId) {
+    if (!currentUser || String(currentUser.id) !== String(userId)) {
       // Only fetch disputes for the current user
       return;
     }
@@ -75,7 +75,7 @@ export default function UserProfile({ userId }: UserProfileProps) {
       // No authorization check - intentional vulnerability (can see all disputes)
       const allDisputes = await api.getDisputes();
       // Filter for disputes filed by this user
-      const userDisputes = allDisputes.filter(d => d.filed_by === userId);
+      const userDisputes = allDisputes.filter(d => String(d.filed_by) === String(userId));
       // Only show active disputes (open or in_review)
       const activeDisputes = userDisputes.filter(d => d.status === 'open' || d.status === 'in_review');
       setDisputes(activeDisputes);
@@ -374,7 +374,7 @@ export default function UserProfile({ userId }: UserProfileProps) {
       )}
 
       {/* Active Disputes */}
-      {getAuthUser()?.id === userId && (
+      {String(getAuthUser()?.id) === String(userId) && (
         <div>
           <h2 className="text-lg font-semibold text-slate-900 mb-4">Active Disputes</h2>
           {disputesLoading ? (

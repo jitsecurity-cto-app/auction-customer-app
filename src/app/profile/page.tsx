@@ -75,7 +75,7 @@ function ProfileContent() {
   return (
     <div>
       {/* IDOR vulnerability notice (for lab purposes) */}
-      {searchParams.get('id') && searchParams.get('id') !== getAuthUser()?.id && (
+      {searchParams.get('id') && String(searchParams.get('id')) !== String(getAuthUser()?.id) && (
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 pt-6">
           <div className="bg-red-50 border border-red-200 rounded-xl p-4">
             <p className="text-sm text-red-800">
