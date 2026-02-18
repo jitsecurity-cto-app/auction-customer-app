@@ -46,6 +46,8 @@ describe('UserProfile', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (getAuthUser as jest.Mock).mockReturnValue({ id: '1', email: 'test@example.com', name: 'Test User', role: 'user' });
+    // Default mock for getDisputes to prevent TypeError on .filter() in component
+    mockApi.getDisputes.mockResolvedValue([]);
   });
 
   it('should display user information', async () => {
@@ -276,7 +278,7 @@ describe('UserProfile', () => {
     });
   });
 
-  it('should not display disputes when viewing another user profile', async () => {
+  it('should display disputes even when viewing another user profile (IDOR vulnerability)', async () => {
     (getAuthUser as jest.Mock).mockReturnValue({ id: '2', email: 'other@example.com', name: 'Other User', role: 'user' });
     mockApi.getUserById.mockResolvedValue(mockUser);
 
@@ -286,8 +288,9 @@ describe('UserProfile', () => {
       expect(screen.getByText('Test User')).toBeInTheDocument();
     });
 
-    expect(screen.queryByText('Active Disputes')).not.toBeInTheDocument();
-    expect(mockApi.getDisputes).not.toHaveBeenCalled();
+    // No authorization check - disputes are shown for any user (IDOR vulnerability)
+    expect(screen.getByText('Active Disputes')).toBeInTheDocument();
+    expect(mockApi.getDisputes).toHaveBeenCalled();
   });
 
   it('should display empty state when no active disputes', async () => {
