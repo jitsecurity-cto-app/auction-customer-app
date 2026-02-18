@@ -6,6 +6,11 @@ import { getAuthUser } from '../../../src/lib/auth';
 // Mock dependencies
 jest.mock('../../../src/lib/api');
 jest.mock('../../../src/lib/auth');
+
+const mockUsePathname = jest.fn().mockReturnValue('/auctions/1');
+jest.mock('next/navigation', () => ({
+  usePathname: () => mockUsePathname(),
+}));
 jest.mock('../../../src/components/BidForm', () => {
   const React = require('react');
   return function MockBidForm() {
@@ -124,6 +129,40 @@ describe('AuctionDetail', () => {
     await waitFor(() => {
       expect(screen.getByText(errorMessage)).toBeInTheDocument();
     });
+  });
+
+  it('should resolve placeholder ID from URL pathname for static export', async () => {
+    // Simulate static export: CloudFront rewrites /auctions/7/ to /auctions/placeholder/
+    // The component receives 'placeholder' but the browser URL is /auctions/7
+    mockUsePathname.mockReturnValue('/auctions/7');
+
+    const mockAuction = {
+      id: '7',
+      title: 'Auction Seven',
+      description: 'Real auction',
+      starting_price: 200,
+      current_bid: 300,
+      end_time: new Date(Date.now() + 86400000).toISOString(),
+      status: 'active',
+      created_by: 'user1',
+      created_at: new Date().toISOString(),
+    };
+
+    (api.get as jest.Mock).mockResolvedValue(mockAuction);
+
+    render(<AuctionDetail auctionId="placeholder" />);
+
+    await waitFor(() => {
+      // Verify API was called with the real ID from the URL, not 'placeholder'
+      expect(api.get).toHaveBeenCalledWith('/auctions/7');
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Auction Seven')).toBeInTheDocument();
+    });
+
+    // Reset mock
+    mockUsePathname.mockReturnValue('/auctions/1');
   });
 
   it('should not validate auctionId (vulnerability)', async () => {

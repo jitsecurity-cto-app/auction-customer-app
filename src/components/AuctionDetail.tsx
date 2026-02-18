@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { api } from '../lib/api';
 import { Auction, Dispute } from '../types';
@@ -40,6 +41,15 @@ interface AuctionWithDetails extends Auction {
 }
 
 export default function AuctionDetail({ auctionId }: AuctionDetailProps) {
+  const pathname = usePathname();
+
+  // With static export, CloudFront rewrites /auctions/7/ to /auctions/placeholder/.
+  // The static HTML has 'placeholder' baked in as the param. Resolve the real ID
+  // from the browser URL pathname.
+  const resolvedId = auctionId === 'placeholder'
+    ? pathname.split('/').filter(Boolean)[1] || auctionId
+    : auctionId;
+
   const [auction, setAuction] = useState<AuctionWithDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -53,7 +63,7 @@ export default function AuctionDetail({ auctionId }: AuctionDetailProps) {
       setLoading(true);
       setError(null);
 
-      const data = await api.get<AuctionWithDetails>(`/auctions/${auctionId}`);
+      const data = await api.get<AuctionWithDetails>(`/auctions/${resolvedId}`);
       setAuction(data);
     } catch (err) {
       const errorMessage = err instanceof Error
@@ -72,13 +82,13 @@ export default function AuctionDetail({ auctionId }: AuctionDetailProps) {
 
   useEffect(() => {
     fetchAuction();
-  }, [auctionId]);
+  }, [resolvedId]);
 
   const fetchDisputes = async () => {
     try {
       // Fetch disputes for this auction
       // No authorization check - intentional vulnerability (can see all disputes)
-      const auctionDisputes = await api.getDisputes({ auction_id: auctionId });
+      const auctionDisputes = await api.getDisputes({ auction_id: resolvedId });
       // Only show active disputes (open or in_review)
       const activeDisputes = auctionDisputes.filter(d => d.status === 'open' || d.status === 'in_review');
       setDisputes(activeDisputes);
@@ -89,10 +99,10 @@ export default function AuctionDetail({ auctionId }: AuctionDetailProps) {
   };
 
   useEffect(() => {
-    if (auctionId) {
+    if (resolvedId) {
       fetchDisputes();
     }
-  }, [auctionId]);
+  }, [resolvedId]);
 
   useEffect(() => {
     if (!auction || !mounted) return;
@@ -297,7 +307,7 @@ export default function AuctionDetail({ auctionId }: AuctionDetailProps) {
             {/* Image Gallery */}
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
               <h2 className="text-lg font-semibold text-slate-900 mb-4">Photos</h2>
-              <ImageGallery auctionId={auctionId} editable={!!isSeller} />
+              <ImageGallery auctionId={resolvedId} editable={!!isSeller} />
             </div>
 
             {/* Description */}
@@ -314,7 +324,7 @@ export default function AuctionDetail({ auctionId }: AuctionDetailProps) {
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
               <h2 className="text-lg font-semibold text-slate-900 mb-4">Bid History</h2>
               <BidHistory
-                auctionId={auctionId}
+                auctionId={resolvedId}
                 onNewBid={(bid) => {
                   // Update the displayed current bid in real-time
                   if (bid.amount && auction) {
