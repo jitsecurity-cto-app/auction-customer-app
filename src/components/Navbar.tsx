@@ -39,8 +39,8 @@ export default function Navbar() {
         <div className="flex h-16 items-center justify-between">
           {/* Left: Logo/Brand */}
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-white font-bold text-sm">A</div>
-            <span className="text-lg font-bold text-slate-900">Auction</span>
+            <img src="/logo.png" alt="AuctionsPulse" className="h-8 w-auto" />
+            <span className="text-lg font-bold text-slate-900">AuctionsPulse</span>
           </Link>
 
           {/* Center: Nav links (desktop) */}

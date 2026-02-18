@@ -22,6 +22,12 @@ variable "domain_name" {
   default     = ""
 }
 
+variable "hosted_zone_name" {
+  description = "Route53 hosted zone name (e.g., auctionspulse.com)"
+  type        = string
+  default     = "auctionspulse.com"
+}
+
 variable "api_url" {
   description = "API URL for the database service"
   type        = string

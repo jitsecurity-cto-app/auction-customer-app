@@ -93,6 +93,8 @@ jobs:
         env:
           TF_VAR_environment: ${{ github.event.inputs.environment || 'dev' }}
           TF_VAR_api_url: ${{ secrets.API_URL || '' }}
+          TF_VAR_domain_name: app.auctionspulse.com
+          TF_VAR_hosted_zone_name: auctionspulse.com
         run: terraform validate
 
       - name: Terraform Plan
@@ -100,6 +102,8 @@ jobs:
         env:
           TF_VAR_environment: ${{ github.event.inputs.environment || 'dev' }}
           TF_VAR_api_url: ${{ secrets.API_URL || '' }}
+          TF_VAR_domain_name: app.auctionspulse.com
+          TF_VAR_hosted_zone_name: auctionspulse.com
         run: terraform plan -out=tfplan
 
       - name: Terraform Apply
@@ -107,6 +111,8 @@ jobs:
         env:
           TF_VAR_environment: ${{ github.event.inputs.environment || 'dev' }}
           TF_VAR_api_url: ${{ secrets.API_URL || '' }}
+          TF_VAR_domain_name: app.auctionspulse.com
+          TF_VAR_hosted_zone_name: auctionspulse.com
         run: terraform apply -auto-approve tfplan
 
       - name: Get Terraform outputs
@@ -134,7 +140,7 @@ jobs:
       - name: Build Next.js application
         env:
           NODE_ENV: production
-          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || secrets.API_URL || '' }}
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || secrets.API_URL || 'https://api.auctionspulse.com/api' }}
         run: npm run build
 
       - name: Verify build output
