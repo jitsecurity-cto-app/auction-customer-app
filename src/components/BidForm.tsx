@@ -5,6 +5,7 @@ import { api } from '../lib/api';
 import { isAuthenticated } from '../lib/auth';
 import { useRouter } from 'next/navigation';
 import { formatCurrency } from '@design-system/utils';
+import { trackEvent } from '@/lib/analytics';
 
 interface BidFormProps {
   auctionId: string;
@@ -58,6 +59,8 @@ export default function BidForm({ auctionId, currentBid, onBidPlaced }: BidFormP
       if (onBidPlaced) {
         onBidPlaced();
       }
+
+      trackEvent('Bid Placed', { auction_id: auctionId, amount: bidAmount });
 
       // Refresh page after a short delay to show updated bid
       setTimeout(() => {

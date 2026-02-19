@@ -4,6 +4,7 @@
 import { AuthResponse, User } from '../types';
 import { api } from './api';
 import { LoginRequest, RegisterRequest } from '../types';
+import { identifyUser, resetAnalytics } from './analytics';
 
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'user_data';
@@ -87,10 +88,11 @@ export async function register(data: RegisterRequest): Promise<AuthResponse> {
   });
 
   const response = await api.post<AuthResponse>('/auth/register', data);
-  
+
   // Store token and user data
   setAuth(response.token, response.user);
-  
+  identifyUser(String(response.user.id), { email: response.user.email, name: response.user.name });
+
   return response;
 }
 
@@ -106,10 +108,11 @@ export async function login(data: LoginRequest): Promise<AuthResponse> {
   });
 
   const response = await api.post<AuthResponse>('/auth/login', data);
-  
+
   // Store token and user data
   setAuth(response.token, response.user);
-  
+  identifyUser(String(response.user.id), { email: response.user.email, name: response.user.name });
+
   // Intentionally log token (security vulnerability)
   console.log('Login successful, token stored:', response.token.substring(0, 20) + '...');
   
@@ -120,6 +123,7 @@ export async function login(data: LoginRequest): Promise<AuthResponse> {
  * Logout current user
  */
 export function logout(): void {
+  resetAnalytics();
   clearAuth();
 }
 

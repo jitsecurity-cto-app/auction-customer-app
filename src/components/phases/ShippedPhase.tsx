@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import { formatCurrency } from '@design-system/utils';
+import { trackEvent } from '@/lib/analytics';
 
 interface ShippedPhaseProps {
   auction: any;
@@ -39,6 +40,7 @@ export default function ShippedPhase({ auction, order, isSeller, isBuyer, onUpda
 
       // Update workflow state
       await api.updateWorkflowState(auction.id, 'complete');
+      trackEvent('Order Completed', { order_id: order.id });
       onUpdate();
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to confirm receipt');

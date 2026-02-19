@@ -1,4 +1,5 @@
 const path = require('path');
+const { withSentryConfig } = require('@sentry/nextjs');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -17,7 +18,7 @@ const nextConfig = {
       ...config.resolve.alias,
       '@design-system': path.resolve(__dirname, '../design-system/src'),
     };
-    
+
     // Fix for CSS HMR issue in development
     if (dev && !isServer) {
       // Improve CSS HMR handling
@@ -28,7 +29,7 @@ const nextConfig = {
         MiniCssExtractPlugin.options.ignoreOrder = true;
       }
     }
-    
+
     return config;
   },
   // Intentionally permissive CORS for lab (security vulnerability)
@@ -46,5 +47,12 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
-
+module.exports = process.env.NEXT_PUBLIC_SENTRY_DSN
+  ? withSentryConfig(nextConfig, {
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+      silent: !process.env.CI,
+      widenClientFileUpload: true,
+      disableLogger: true,
+    })
+  : nextConfig;
