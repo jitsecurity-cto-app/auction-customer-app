@@ -312,6 +312,16 @@ export const api = {
     });
   },
 
+  async getOrder(id: number) {
+    return apiRequest<any>(`/orders/${id}`, { requireAuth: true });
+  },
+
+  createPaymentIntent: (orderId: number) =>
+    apiRequest<{ client_secret: string; payment_intent_id: string }>(
+      '/payments/create-intent',
+      { method: 'POST', body: JSON.stringify({ order_id: orderId }), requireAuth: true }
+    ),
+
   // Auction closure endpoints
   async closeAuction(id: string) {
     return apiRequest<any>(`/auctions/${id}/close`, {

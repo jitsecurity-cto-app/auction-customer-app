@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import { formatCurrency } from '@design-system/utils';
+import { trackEvent } from '@/lib/analytics';
+import StripeCheckout from '../StripeCheckout';
+import { useFlags } from 'launchdarkly-react-client-sdk';
 
 interface PendingSalePhaseProps {
   auction: any;
@@ -19,6 +22,12 @@ export default function PendingSalePhase({ auction, order, isSeller, isBuyer, on
   const [updating, setUpdating] = useState(false);
   const [creatingOrder, setCreatingOrder] = useState(false);
 
+  let stripeEnabled = false;
+  const flags = useFlags();
+  if (flags && flags['enable-stripe-checkout'] === true) {
+    stripeEnabled = true;
+  }
+
   useEffect(() => {
     if (order) {
       setTrackingNumber(order.tracking_number || '');
@@ -26,6 +35,12 @@ export default function PendingSalePhase({ auction, order, isSeller, isBuyer, on
       setShippingAddress(order.shipping_address || '');
     }
   }, [order]);
+
+  useEffect(() => {
+    if (isBuyer && !order) {
+      trackEvent('Auction Won', { auction_id: auction.id, winning_amount: auction.current_bid });
+    }
+  }, []);
 
   const handleCreateOrder = async () => {
     if (!shippingAddress.trim()) {
@@ -40,6 +55,7 @@ export default function PendingSalePhase({ auction, order, isSeller, isBuyer, on
         shipping_address: shippingAddress,
       });
       onUpdate();
+      trackEvent('Order Created', { auction_id: auction.id, amount: auction.current_bid });
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to create order');
     } finally {
@@ -78,6 +94,7 @@ export default function PendingSalePhase({ auction, order, isSeller, isBuyer, on
     }
 
     await handleUpdateOrder(updates);
+    trackEvent('Item Shipped', { order_id: order.id, tracking_number: trackingNumber });
 
     // Also update workflow state
     try {
@@ -163,11 +180,22 @@ export default function PendingSalePhase({ auction, order, isSeller, isBuyer, on
             )}
           </div>
           {order.status === 'pending_payment' && (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
-              <p className="text-sm font-medium text-amber-800">
-                Payment is pending. Please complete payment to proceed.
-              </p>
-            </div>
+            stripeEnabled ? (
+              <div className="mb-4">
+                <h4 className="text-sm font-semibold text-slate-900 mb-3">Complete Payment</h4>
+                <StripeCheckout
+                  orderId={order.id}
+                  amount={order.total_amount}
+                  onSuccess={onUpdate}
+                />
+              </div>
+            ) : (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+                <p className="text-sm font-medium text-amber-800">
+                  Payment is pending. Please complete payment to proceed.
+                </p>
+              </div>
+            )
           )}
           <p className="text-xs text-slate-500">
             {order.status === 'pending_payment'

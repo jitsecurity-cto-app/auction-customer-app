@@ -80,9 +80,19 @@ jobs:
           role-to-assume: arn:aws:iam::497919588760:role/deployer_oidc
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Set environment
+        id: env
+        run: echo "name=${{ github.event.inputs.environment || 'dev' }}" >> $GITHUB_OUTPUT
+
       - name: Terraform Init
         working-directory: ./terraform
-        run: terraform init
+        run: |
+          ENV="${{ steps.env.outputs.name }}"
+          if [ "$ENV" = "prod" ]; then
+            terraform init
+          else
+            terraform init -reconfigure -backend-config="key=customer-app/${ENV}/terraform.tfstate"
+          fi
 
       - name: Terraform Format Check
         working-directory: ./terraform
@@ -93,7 +103,7 @@ jobs:
         env:
           TF_VAR_environment: ${{ github.event.inputs.environment || 'dev' }}
           TF_VAR_api_url: ${{ secrets.API_URL || '' }}
-          TF_VAR_domain_name: app.auctionspulse.com
+          TF_VAR_domain_name: ${{ (github.event.inputs.environment || 'dev') == 'prod' && 'app.auctionspulse.com' || format('app.{0}.auctionspulse.com', github.event.inputs.environment || 'dev') }}
           TF_VAR_hosted_zone_name: auctionspulse.com
         run: terraform validate
 
@@ -102,7 +112,7 @@ jobs:
         env:
           TF_VAR_environment: ${{ github.event.inputs.environment || 'dev' }}
           TF_VAR_api_url: ${{ secrets.API_URL || '' }}
-          TF_VAR_domain_name: app.auctionspulse.com
+          TF_VAR_domain_name: ${{ (github.event.inputs.environment || 'dev') == 'prod' && 'app.auctionspulse.com' || format('app.{0}.auctionspulse.com', github.event.inputs.environment || 'dev') }}
           TF_VAR_hosted_zone_name: auctionspulse.com
         run: terraform plan -out=tfplan
 
@@ -111,7 +121,7 @@ jobs:
         env:
           TF_VAR_environment: ${{ github.event.inputs.environment || 'dev' }}
           TF_VAR_api_url: ${{ secrets.API_URL || '' }}
-          TF_VAR_domain_name: app.auctionspulse.com
+          TF_VAR_domain_name: ${{ (github.event.inputs.environment || 'dev') == 'prod' && 'app.auctionspulse.com' || format('app.{0}.auctionspulse.com', github.event.inputs.environment || 'dev') }}
           TF_VAR_hosted_zone_name: auctionspulse.com
         run: terraform apply -auto-approve tfplan
 
@@ -140,7 +150,7 @@ jobs:
       - name: Build Next.js application
         env:
           NODE_ENV: production
-          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || secrets.API_URL || 'https://api.auctionspulse.com/api' }}
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || secrets.API_URL || ((github.event.inputs.environment || 'dev') == 'prod' && 'https://api.auctionspulse.com/api' || format('https://api.{0}.auctionspulse.com/api', github.event.inputs.environment || 'dev')) }}
         run: npm run build
 
       - name: Verify build output
