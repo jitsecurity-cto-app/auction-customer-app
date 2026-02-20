@@ -24,7 +24,7 @@ export default function PendingSalePhase({ auction, order, isSeller, isBuyer, on
 
   let stripeEnabled = false;
   const flags = useFlags();
-  if (flags && flags['enable-stripe-checkout'] === true) {
+  if (flags && flags.enableStripeCheckout === true) {
     stripeEnabled = true;
   }
 
