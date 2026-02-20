@@ -151,6 +151,10 @@ jobs:
         env:
           NODE_ENV: production
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || secrets.API_URL || ((github.event.inputs.environment || 'dev') == 'prod' && 'https://api.auctionspulse.com/api' || format('https://api.{0}.auctionspulse.com/api', github.event.inputs.environment || 'dev')) }}
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '' }}
+          NEXT_PUBLIC_LAUNCHDARKLY_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_LAUNCHDARKLY_CLIENT_ID || '' }}
+          NEXT_PUBLIC_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN || '' }}
+          NEXT_PUBLIC_WS_URL: ${{ secrets.NEXT_PUBLIC_WS_URL || '' }}
         run: npm run build
 
       - name: Verify build output
