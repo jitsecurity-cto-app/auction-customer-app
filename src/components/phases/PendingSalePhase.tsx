@@ -185,7 +185,7 @@ export default function PendingSalePhase({ auction, order, isSeller, isBuyer, on
                 <h4 className="text-sm font-semibold text-slate-900 mb-3">Complete Payment</h4>
                 <StripeCheckout
                   orderId={order.id}
-                  amount={order.total_amount}
+                  amount={Number(order.total_amount)}
                   onSuccess={onUpdate}
                 />
               </div>

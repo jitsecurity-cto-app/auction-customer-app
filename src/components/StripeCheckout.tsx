@@ -16,7 +16,8 @@ interface StripeCheckoutProps {
   onSuccess: () => void;
 }
 
-function CheckoutForm({ orderId, amount, onSuccess }: StripeCheckoutProps) {
+function CheckoutForm({ orderId, amount: rawAmount, onSuccess }: StripeCheckoutProps) {
+  const amount = Number(rawAmount);
   const stripe = useStripe();
   const elements = useElements();
   const [error, setError] = useState<string | null>(null);
